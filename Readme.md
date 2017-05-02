@@ -7,7 +7,7 @@
 
      **Everyone else**: send an email to [copss-users+subscribe@googlegroups.com](Link URL)
 
-* Our method paper has details on the implementation and tests of this code: [An O(N) and parallel approach to integral problems by a kernel-independent fast multipole method: Application to polarization and magnetization of interacting particles](https://arxiv.org/abs/1605.01715)
+* Our method paper has details on the implementation and tests of this code:  [Parallel $O(N)$ Stokes' solver towards scalable Brownian dynamics  in general geometries, submitted, 2017]
 
 ### License ###
 
