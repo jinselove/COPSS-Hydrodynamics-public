@@ -1,27 +1,14 @@
-# Parallel Finite Element - General Geometry Ewald Method (pFE-GgEm)
-
-pFE-GgEm is an efficient and $O(N)$ computational approach
-to model the dynamics of hydrodynamically interacting Brownian or finite size particles in 
-arbitrary geometries.
-
-# 0.0 Access the source code
+### Contacts ###
 
 
-# 1. Install base libraries
+* If you need help, have any questions or comments, join our mailing list [copss-users@googlegroups.com](Link URL)
 
-* Install SLEPC
+     **GMail users**: just click "Join group" button
 
-* Install PETSC
+     **Everyone else**: send an email to [copss-users+subscribe@googlegroups.com](Link URL)
 
-* Install LIBMESH
+* Our method paper has details on the implementation and tests of this code: [An O(N) and parallel approach to integral problems by a kernel-independent fast multipole method: Application to polarization and magnetization of interacting particles](https://arxiv.org/abs/1605.01715)
 
-* (optional) DOXYGEN
+### License ###
 
-# 2. Compile the application code.
-
-* Compile examples
-
-* Generate documentaion, class heirarchy, function calling relations, etc. 
-
-# 3. Run simulations
-
+* The codes are open-source and distributed under the GNU GPL license, and may not be used for any commercial or for-profit purposes without our permission.
