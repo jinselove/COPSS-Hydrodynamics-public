@@ -1,0 +1,5 @@
+This folder is used for debug purpose
+
+It contains one simple polymer chain (11 beads)
+
+The box is small enough (mesh = 8*8*8) so that the computation is pretty cheap 

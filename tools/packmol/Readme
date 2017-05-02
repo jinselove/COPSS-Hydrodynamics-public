@@ -1,0 +1,41 @@
+#####Instructions to generate simulation data file
+1. Install PACKMOL
+
+	1.a. Go to folder ../packmol
+	1.b. Compile PACKMOL by simply typing "Make"
+	(if there are any errors reported, refer to http://www.ime.unicamp.br/~martinez/packmol/userguide.shtml)
+
+2. Generate simulation data file (this example is only for spherical particles in a spherical cavity)
+
+	2.a. Copy "packmol" excutable to whereever you want to generate your data file
+	2.b. Build "cell.inp" and "spheres.xyz" (examples are given in /packmol_inputs/)
+	2.c Generate output using packmol: "./packmol < cell.inp"
+
+3. Alternatively, one can use bead_data_generator.py which only requires a "packmol" excutable to generate data.
+
+
+###########details about the input file cell.inp################
+#vi cell.inp
+#
+# generate N spherical molecules inside of a spherical cavity -- for cell project
+#
+# All the atoms from diferent molecules will be separated at least 2.0
+tolerance 2.0
+# The name of the output file
+output spheres_in_cell.xyz
+# The file type of input and output files is xyz
+filetype xyz
+# 100 spheres of radius=1.0 will be put in a spherical cavity defined by center (0,0,0) and radius=50.
+# the structure of the spheres is defined in spheres.xyz
+structure spheres.xyz
+number 100
+inside sphere 0. 0. 0. 50
+radius 1.0
+end structure
+
+###########details about spheres.xyz################
+#since the spheres in our case is just a single particle instead of a molecular containing multiple atoms,
+#we don't need to specify the relative positions of all the atoms of a molecule
+1
+spheres
+H 0 0 0

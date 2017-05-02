@@ -1,0 +1,38 @@
+# Sample Procedures to relax polymers in a slit 
+#   1. set simulation box, wall type, boundary condition
+#   2. choose a soft potential
+#   3. use a very small time step, e.g. 1e-18
+#   4. iterate the following until the time step is large, e.g. 1e-1
+#         1) run for many, e.g. 1e5, steps
+#         2) change this script to read the last frame of previous simulation (soft.restart)
+#         3) gradually increase time step
+
+units		lj
+atom_style	bond
+dimension	3
+boundary        p p f
+
+read_data       polymer_data_40chains.in
+#read_restart     soft.restart
+
+pair_style      soft 30
+pair_coeff      * * 10.0 30
+
+bond_style      harmonic
+bond_coeff      1 10.0 18
+
+fix             wallhi all wall/lj93 zhi EDGE 100.0 2.0 2.5
+fix             walllo all wall/lj93 zlo EDGE 100.0 2.0 2.5
+
+fix             1 all nvt temp 100.0 100.0 0.1
+
+dump		1 all xyz 10000 particle.xyz
+
+restart         10000 soft.restart
+
+thermo_style	custom step epair etotal
+thermo		10000
+
+timestep	0.0000000001
+
+run             200000

@@ -1,0 +1,22 @@
+#
+# generate N spherical molecules inside of a spherical cavity -- for cell project
+#
+
+# All the atoms from diferent molecules will be separated at least 2.0
+tolerance 20.0  
+
+# The name of the output file
+output randomSpheres50.xyz
+
+# The file type of input and output files is xyz
+filetype xyz
+
+# 100 spheres of radius=1.0 will be put in a spherical cavity defined by center (0,0,0) and radius=50.
+
+# the structure of the spheres is defined in spheres.xyz
+structure spheres.xyz 
+  number 50
+  inside sphere 0. 0. 0. 50 #center_x, center_y, center_z, radius_of_cell
+  radius 10.0 # radius of particle
+end structure 
+ 
