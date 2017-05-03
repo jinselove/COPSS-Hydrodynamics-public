@@ -157,7 +157,8 @@ Hydrodynamic and electrostatic interactions are ubiquitous in nature and technol
 
 **Algorithm**
 -------------------------------------------
- -  Our method paper has details on the implementation and tests of this code:  **Parallel $O(N)$ Stokes' solver towards scalable Brownian dynamics  in general geometries, submitted, 2017**
+ Our method paper has details on the implementation and tests of this code:  **Parallel $O(N)$ Stokes' solver towards scalable Brownian dynamics  in general geometries, submitted, 2017**
+
 
 **Main contributors**
 -------------------------------------------
@@ -172,4 +173,5 @@ Hydrodynamic and electrostatic interactions are ubiquitous in nature and technol
 
 **License**
 -------------------------------------------
+ 
 * The codes are open-source and distributed under the GNU GPL license, and may not be used for any commercial or for-profit purposes without our permission.
