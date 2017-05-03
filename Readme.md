@@ -1,5 +1,6 @@
 **COPSS**
-=============
+====================
+
 **COPSS** (Continuum Particle Simulation Suite) is an open source,  [**LIBMESH**](http://libmesh.github.io/) based, software for continuum simulations. The package is designed to be easy to use, extendable and scalable. It currently includes two modules, [**COPSS-Hydrodynamics**](https://bitbucket.org/COPSS/copss-hydrodynamics-public.git) to solve hydrodynamic interactions in colloidal suspensions and [**COPSS-Polarization**](https://bitbucket.org/COPSS/copss-polarization-public) to solve electrostatic interactions between dielectric particles. The algorithms beneath **COPSS** have been published or under-review, but the code framework, user-interface, etc., are still rough. We are working on improving **COPSS** and appreciate your contributions.  
 
 
@@ -148,9 +149,25 @@ Hydrodynamic and electrostatic interactions are ubiquitous in nature and technol
 **Contact**
 -------------------------------------------
  
+ -  If you need help, have any questions or comments, join our mailing list [copss-users@googlegroups.com](Link URL)
 
+     **GMail users**: just click "Join group" button
+
+     **Everyone else**: send an email to [copss-users+subscribe@googlegroups.com](Link URL)
+
+ -  Our method paper has details on the implementation and tests of this code:  [Parallel $O(N)$ Stokes' solver towards scalable Brownian dynamics  in general geometries, submitted, 2017]
+
+**Main contributors**
+-------------------------------------------
  
 
  - [**Jiyuan Li**](https://scholar.google.com/citations?user=XE6JtJwAAAAJ&hl=en), Institute for Molecular Engineering, the University of Chicago. [LinkedIn](https://www.linkedin.com/in/jyliuchicago/) , [EMAIL](jyli@uchicago.edu)
- - [**Xikai Jiang**](https://www.researchgate.net/profile/Xikai_Jiang), Institute for Molecular Engineering, the University of Chicago. [EMAIL](xikai@uchicago.edu)
+ 
+ - [**Dr. Xikai Jiang**](https://www.researchgate.net/profile/Xikai_Jiang), Institute for Molecular Engineering, the University of Chicago. [EMAIL](xikai@uchicago.edu)
+ 
+ - [**Dr. Xujun Zhao**]
+ 
 
+### License ###
+
+* The codes are open-source and distributed under the GNU GPL license, and may not be used for any commercial or for-profit purposes without our permission.
