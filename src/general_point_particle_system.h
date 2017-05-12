@@ -34,15 +34,25 @@ public:
 	void build_system();
 
 protected:
-	std::string _point_particle_model;
-	unsigned int _Nb; // total # of beads
-	unsigned int _Ns = _Nb - 1; // total # of springs per Chain --> _Ns = _Nb-1
-	unsigned int _nChains; // total # of chains
-	Real _bk; // Kuhn length (um)
-	Real _Nks; // # of Kuhn length per Chain
-	Real _q0 = _Nks * _bk; //maximum spring length (um)
-	Real _chain_length = _Ns * _q0; // contour length of the spring (um)
-	
+	std::string particle_type; // particle type (either finite_size_particle or point_particle)
+	std::string point_particle_model;
+	// ===========for beads
+	unsigned int Nb; // total # of beads
+	unsigned int Ns; // total # of springs per Chain
+	// ===========for polymer chains
+	unsigned int nChains; // total # of chains
+	Real bk; // Kuhn length (um)
+	Real Nks; // # of Kuhn length per Chain
+	Real Ss2; // (um^2)
+	Real q0; //maximum spring length (um)
+	Real chain_length; // contour length of the spring (um)
+	Real Dc; // Diffusivity of the chain (um^2/s)
+
+	//void read_data(std::string control_file){};
+	// override read_particle_parameters() function in Copss class
+	void read_particle_parameter () override;
+
+
 };
 
 

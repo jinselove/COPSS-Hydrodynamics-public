@@ -116,18 +116,23 @@ protected:
    * Read input parameters
    */ 
 
-  void read_data(std::string control_file);
-
+  //virtual void read_data(std::string control_file) = 0;
+  virtual void read_data(std::string control_file) final;
 
   /*
    * Read test_name
    */
-  virtual void read_test_name();
+  virtual void read_test_name() final;
 
   /*
-   * Read physical parameters 
+   * Read physical parameters
    */
-  virtual void read_physical_parameters();
+  virtual void read_physical_parameter() final;
+
+  /*
+   * Read physical parameters (will be overriden in derived class)
+   */
+  virtual void read_particle_parameter() = 0;
 
   /*
    * Read Geometry infomation
@@ -169,14 +174,37 @@ protected:
   //protected variables
 
   // PETSC MPI communicator
-  Parallel::Communicator _comm_in;
+  Parallel::Communicator comm_in;
+  // error message string
+  std::string error_msg;
   // control file object
-  GetPot _input_file;
+  GetPot input_file;
   // test name
-  std::string _test_name;
+  std::string test_name;
   // physical parameters
-  std::string _particle_type;
-  Real _viscosity, _drag_c, _Rb, _Db;
+  const Real kB = 1.380662E-17;//1.380662E-23(J/K) = 1.3806623E-23(N*m/K) = 1.380662E-17(N*um/K)
+  const Real PI = libMesh::pi;
+  Real T; // simulation temperature (K)
+  Real kBT;// (N*um)
+  Real viscosity; // viscosity of the fluid (cp = N*s/um^2)
+  Real Rb; // radius of the bead
+  Real drag_c; // Drag coefficient (N*s/um)
+  Real Db;
+
+  // characteristic variables
+  Real tc; // characteristic time (diffusion time) (s)
+  Real uc; // characteristic velocity (um/s)
+  Real fc; // characteristic force (N)
+  Real muc; // non-dimensional viscosity
+
+  // Geometry information
+  unsigned int dim; // dimension of the box
+  std::string wall_type; // wall_type (slit or sphere)
+  std::vector<Real> wall_params; // (wall parameters; e.g. slit = '-50,50,-50,50,-50,50' or sphere = '10')
+  std::vector<bool> periodicity; // periodicity of the box
+  std::vector<bool> inlet; // inlet direction of the box
+  std::vector<Real> inlet_pressure; // inlet pressure
+
 
 };
 
