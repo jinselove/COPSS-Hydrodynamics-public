@@ -158,7 +158,7 @@ protected:
   /*
    * read Stokes Solver  
    */
-  virtual void read_stokes_solver_info();
+  virtual void read_stokes_solver_info() final;
 
   /*
    * read Chebyshev info
@@ -218,9 +218,27 @@ protected:
   std::vector<std::string> pw_force_types;
   std::vector<ForceField::type_force> pw_forces;
 
-  // GGEM info
+  // GGEM information
   Real alpha;
 
+  // Solver information
+  int max_linear_iterations;
+  Real linear_solver_rtol;
+  Real linear_solver_atol;
+  bool user_defined_pc;
+  bool schur_user_ksp;
+  Real schur_user_ksp_rtol;
+  Real schur_user_ksp_atol;
+  std::string schur_pc_type;
+  std::string stokes_solver_type;
+  StokesSolverType solver_type; 
+
+  // Chebyshev information
+  unsigned int max_n_cheb; // max order of Chebyshev polynomianl 
+  Real tol_cheb; // tolerance of chebyshev convergence
+  Real eig_factor; // factor to resize eigen value range
+  Real tol_eigen; // tolerance of eigenvalue convergence
+  bool compute_eigen; // if compute eigen value; initially set it true
 
 
 };

@@ -98,6 +98,8 @@ void Copss::read_data(std::string control_file)
   this -> read_mesh_info();
   this -> read_force_info();
   this -> read_ggem_info();
+  this -> read_stokes_solver_info();
+  this -> read_chebyshev_info();
 } // end read_data function
 
 
@@ -326,20 +328,81 @@ void Copss::read_ggem_info(){
   }
 }
 
-  /*
-   * read Stokes Solver  
-   */
-  void Copss::read_stokes_solver_info(){}
+/*
+ * read Stokes Solver  
+ */
+void Copss::read_stokes_solver_info(){
+  max_linear_iterations = input_file("max_linear_iterations", 100);
+  linear_solver_rtol   = input_file("linear_solver_rtol", 1E-6);
+  linear_solver_atol   = input_file("linear_solver_atol", 1E-6);
+  user_defined_pc            = input_file("user_defined_pc", true);
+  schur_user_ksp       = input_file("schur_user_ksp", false);
+  schur_user_ksp_rtol  = input_file("schur_user_ksp_rtol", 1E-6);
+  schur_user_ksp_atol  = input_file("schur_user_ksp_atol", 1E-6);
+  schur_pc_type = input_file("schur_pc_type", "SMp");
+  stokes_solver_type = input_file("stokes_solver", "superLU_dist");
+  if(stokes_solver_type=="superLU_dist") {
+    solver_type = superLU_dist;
+    user_defined_pc = false;
+  }
+  else if(stokes_solver_type=="field_split") {
+    solver_type = field_split;
+    user_defined_pc = true;
+  }
+  else {
+    solver_type = user_define;
+  }  
 
-  /*
-   * read Chebyshev info
-   */
-  void Copss::read_chebyshev_info(){}
+  if(comm_in.rank() == 0){
+    printf("##########################################################\n"
+           "#                 Solver information                     \n"
+           "##########################################################\n\n"
+           "  Stokes solver type = %s\n", stokes_solver_type.c_str());
+    if (stokes_solver_type=="field_split"){
+      printf("  FieldSplit Schur Complement Reduction Solver \n"
+             "  schur_pc_type = %s\n", schur_pc_type.c_str());
+        if(schur_user_ksp){
+              printf(" user defined KSP is used for Schur Complement!\n"
+                     " KSP rel tolerance for Schur Complement solver is = %.4e\n",
+                     " KSP abs tolerance for Schur Complement solver is = %.4e\n",
+              schur_user_ksp_rtol,schur_user_ksp_atol);
+          }// end if(schur_user_ksp)
+    }// end if (stokes_solver_type == "field_split")
+  } // end if (comm_in.rank() == 0)
+}// end read_stokes_solver_info()
 
-  /*
-   * read run time info 
-   */
-  void Copss::read_run_info(){}
+/*
+ * read Chebyshev info
+ */
+void Copss::read_chebyshev_info(){
+    max_n_cheb = input_file("max_n_cheb", 10);
+    tol_cheb = input_file("tol_cheb", 0.1);
+    eig_factor = input_file("eig_factor", 1.05);
+    tol_eigen = input_file("tol_eigen", 0.01);
+
+    // Initially set compute_eigen flag to be true
+    compute_eigen = true;
+
+    // print out information
+    if(comm_in.rank() == 0){
+      printf("##########################################################\n"
+             "#   Chebyshev information (only needed by brownian System)   \n"
+             "##########################################################\n\n"  
+             "  Initially compute_eigen flag is set to be True !!!!\n"
+             "  max number of chebyshev polynomial = %d\n"
+             "  tolerance of chebyshev polynomial = %.4e\n"
+             "  factor of eigenvalues range = %.4e\n"
+             "  tolerance of eigenvalues convergence = %.4e\n",  
+             max_n_cheb, tol_cheb, eig_factor, tol_eigen);
+    } // end if (comm_in.rank() == 0)
+
+} // end read_chebyshev_info()
+
+
+/*
+ * read run time info 
+ */
+void Copss::read_run_info(){}
 
 
 }
