@@ -91,15 +91,16 @@ void Copss::read_data(std::string control_file)
 {
   const GetPot tmp(control_file);
   input_file = tmp;
-  this -> read_test_name();
-  this -> read_physical_parameter();
-  this -> read_particle_parameter();
-  this -> read_geometry();
+  this -> read_test_info();
+  this -> read_physical_info();
+  this -> read_particle_info();
+  this -> read_geometry_info();
+  this -> read_mesh_info();
 } // end read_data function
 
 
 //====================================================================
-void Copss::read_test_name()
+void Copss::read_test_info()
   {
     test_name = input_file("test_name", "validation");
 
@@ -114,7 +115,7 @@ void Copss::read_test_name()
   /*
    * Read physical parameters 
    */
-void Copss::read_physical_parameter()
+void Copss::read_physical_info()
 {
   T = input_file("temperature", 297);// K
   kBT    = kB * T; //(N*um)
@@ -152,7 +153,7 @@ void Copss::read_physical_parameter()
    * Read Geometry infomation
    */
 
-void Copss::read_geometry()
+void Copss::read_geometry_info()
 {
   dim = input_file("dimension", 3);
   //=============== wall type and wall params
@@ -220,32 +221,57 @@ void Copss::read_geometry()
   /*
    * Read mesh
    */
-  void Copss::read_mesh(){}
+void Copss::read_mesh_info(){
+  if(comm_in.rank() == 0){
+  printf("##########################################################\n"
+         "#                   Mesh information                      \n"
+         "##########################################################\n\n");
+  }
+
+  generate_mesh = input_file("generate_mesh", false); 
+  if (generate_mesh){
+    n_mesh.resize(input_file.vector_variable_size("n_mesh"));
+    for (unsigned int i=0; i < n_mesh.size(); i++){ n_mesh[i] = input_file("n_mesh", 10, i); }
+    if(comm_in.rank() == 0){
+      printf(" Generate Mesh:  n_mesh = ");
+      for (int i = 0 ; i < dim; i++) printf("%.2e, ",n_mesh[i]);
+      printf("\n");
+    } // end if comm_in.rank() == 0
+  }
+  else{
+    domain_mesh_file = input_file("domain_mesh_file" , "nothing");
+    if(comm_in.rank() == 0){
+      printf(" Load mesh file from = %s\n", domain_mesh_file.c_str());
+    } // end if comm_in.rank() == 0  
+  } // end else
+
+} // end read_mesh_info()
+
 
   /*
    * read force types
    */
-  void Copss::read_force(){}
+  void Copss::read_force_info(){}
 
   /*
    * read GGEM info
    */
-  void Copss::read_ggem(){}
+  void Copss::read_ggem_info(){}
 
   /*
    * read Stokes Solver  
    */
-  void Copss::read_stokes_solver(){}
+  void Copss::read_stokes_solver_info(){}
 
   /*
    * read Chebyshev info
    */
-  void Copss::read_chebyshev(){}
+  void Copss::read_chebyshev_info(){}
 
   /*
    * read run time info 
    */
-  void Copss::read_run(){}
+  void Copss::read_run_info(){}
 
 
 }

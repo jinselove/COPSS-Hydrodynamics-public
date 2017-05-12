@@ -122,53 +122,53 @@ protected:
   /*
    * Read test_name
    */
-  virtual void read_test_name() final;
+  virtual void read_test_info() final;
 
   /*
    * Read physical parameters
    */
-  virtual void read_physical_parameter() final;
+  virtual void read_physical_info() final;
 
   /*
    * Read physical parameters (will be overriden in derived class)
    */
-  virtual void read_particle_parameter() = 0;
+  virtual void read_particle_info() = 0;
 
   /*
    * Read Geometry infomation
    */
 
-  virtual void read_geometry() final;
+  virtual void read_geometry_info() final;
 
   /*
    * Read mesh
    */
-  virtual void read_mesh();
+  virtual void read_mesh_info() final;
 
   /*
    * read force types
    */
-  virtual void read_force();
+  virtual void read_force_info();
 
   /*
    * read GGEM info
    */
-  virtual void read_ggem();
+  virtual void read_ggem_info();
 
   /*
    * read Stokes Solver  
    */
-  virtual void read_stokes_solver();
+  virtual void read_stokes_solver_info();
 
   /*
    * read Chebyshev info
    */
-  virtual void read_chebyshev();
+  virtual void read_chebyshev_info();
 
   /*
    * read run time info 
    */
-  virtual void read_run();
+  virtual void read_run_info();
 
 
   //protected variables
@@ -205,6 +205,10 @@ protected:
   std::vector<bool> inlet; // inlet direction of the box
   std::vector<Real> inlet_pressure; // inlet pressure
 
+  // Mesh information
+  bool generate_mesh; // flag to generate mesh or load mesh
+  std::string domain_mesh_file; // domain mesh filename
+  std::vector<Real> n_mesh; // mesh size in all directions
 
 };
 

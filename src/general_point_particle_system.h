@@ -50,7 +50,7 @@ protected:
 
 	//void read_data(std::string control_file){};
 	// override read_particle_parameters() function in Copss class
-	void read_particle_parameter () override;
+	void read_particle_info () override;
 
 
 };

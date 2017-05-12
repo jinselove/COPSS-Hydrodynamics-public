@@ -18,16 +18,8 @@ void GeneralPointParticleSystem::build_system(){
 	this -> read_data("polymer_control.in");
 }
 
-// void GeneralPointParticleSystem::read_data(std::string control_file){
-//     const GetPot tmp(control_file);
-//     input_file = tmp;
-// 	this -> read_test_name();
-// 	this -> read_physical_parameter();
-// 	this -> read_particle_parameter();
-// }
 
-
-void GeneralPointParticleSystem::read_particle_parameter(){
+void GeneralPointParticleSystem::read_particle_info(){
 
 	const string particle_type = input_file("particle_type","other");
 	if(particle_type != "point_particle" and particle_type != "finite_size_particle"){
@@ -99,6 +91,8 @@ void GeneralPointParticleSystem::read_particle_parameter(){
 			  		bk/Rb, q0/Rb, chain_length/Rb, std::sqrt(Ss2/Rb/Rb), std::sqrt(PI)/(3.) );
 		}
 	} // end if (comm_in.rank() == 0)
-}
+}// end read_particle_parameter()
+
+
 
 } // end of namespace
