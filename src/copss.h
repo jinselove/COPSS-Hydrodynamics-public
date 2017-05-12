@@ -110,24 +110,24 @@ protected:
    * This function will be overriden later in inheritance class
    * This function contains all we need to build a new system
    */ 
-  virtual void build_system() = 0;
+  virtual void build_system();
 
   /*
    * Read input parameters
    */ 
 
   //virtual void read_data(std::string control_file) = 0;
-  virtual void read_data(std::string control_file) final;
+  virtual void read_data(std::string control_file) ;
 
   /*
    * Read test_name
    */
-  virtual void read_test_info() final;
+  virtual void read_test_info();
 
   /*
    * Read physical parameters
    */
-  virtual void read_physical_info() final;
+  virtual void read_physical_info();
 
   /*
    * Read physical parameters (will be overriden in derived class)
@@ -138,27 +138,27 @@ protected:
    * Read Geometry infomation
    */
 
-  virtual void read_geometry_info() final;
+  virtual void read_geometry_info();
 
   /*
    * Read mesh
    */
-  virtual void read_mesh_info() final;
+  virtual void read_mesh_info();
 
   /*
    * read force types
    */
-  virtual void read_force_info() final;
+  virtual void read_force_info();
 
   /*
    * read GGEM info
    */
-  virtual void read_ggem_info() final;
+  virtual void read_ggem_info();
 
   /*
    * read Stokes Solver  
    */
-  virtual void read_stokes_solver_info() final;
+  virtual void read_stokes_solver_info();
 
   /*
    * read Chebyshev info
@@ -239,6 +239,22 @@ protected:
   Real eig_factor; // factor to resize eigen value range
   Real tol_eigen; // tolerance of eigenvalue convergence
   bool compute_eigen; // if compute eigen value; initially set it true
+
+  // Run time info
+  bool with_brownian; // if consider brownian motion
+  std::size_t random_seed;
+  bool adaptive_dt; // if use adaptive time step (essential for brownian systems)
+  Real dt0; // timestep when brownian system starts (step1)
+  Real max_dr_coeff; // max displacement per step
+  bool restart; // if restart
+  std::size_t restart_step; // restart step
+  Real restart_time; // real time at restart step
+  unsigned int nstep; // totol number of steps to run
+  unsigned int write_interval; // output file write interval
+
+  bool write_es, out_msd_flag, out_stretch_flag, out_gyration_flag, out_com_flag;
+
+
 
 
 };

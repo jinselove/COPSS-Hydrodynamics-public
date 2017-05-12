@@ -85,6 +85,10 @@ void Copss::end_time(struct tm * timeinfo){
   }	
 }
 
+//====================================================================
+void Copss::build_system(){
+
+}
 
 //====================================================================
 void Copss::read_data(std::string control_file)
@@ -100,6 +104,7 @@ void Copss::read_data(std::string control_file)
   this -> read_ggem_info();
   this -> read_stokes_solver_info();
   this -> read_chebyshev_info();
+  this -> read_run_info();
 } // end read_data function
 
 
@@ -402,10 +407,65 @@ void Copss::read_chebyshev_info(){
 /*
  * read run time info 
  */
-void Copss::read_run_info(){}
+void Copss::read_run_info(){
 
+  //############## Without Brownian ###############################
+  // For polymer_chain and bead: maximum displacement (non dimensional) of one step = max_dr_coeff * fluid mesh size minimum (hmin)
+  //############## With Brownian ##################################
+  // For polymer_chain: maximum displacement (non dimensional) of one step = max_dr_coeff * Ss2/Rb/Rb * 1.0
+  // For bead: maximum displacement (non_dimensional) of one step = max_dr_coeff * 1.0
+  with_brownian  = input_file("with_brownian", true);
+  if(with_brownian){
+    dt0 = input_file("dt0", 1.e-3);
+    random_seed   = input_file("random_seed",111);
+  }
+  adaptive_dt    = input_file("adaptive_dt", true);  
+  max_dr_coeff = input_file("maximum_displacement_coeff",0.1);
+  restart       = input_file("restart", false);  
+  restart_step  = input_file("restart_step", 0);
+  restart_time  = input_file("restart_time", 0.0);
+  if(restart) // update the seed for restart mode
+  {
+    random_seed++;
+  }
+  else        // set the restart_step as zero
+  {
+    restart_step = 0;
+    restart_time = 0.0;
+  }
 
-}
+  nstep = input_file("nstep", 1);
+  write_interval = input_file("write_interval", 1);
+
+  write_es      = input_file("write_es", true);
+  out_msd_flag      = input_file("out_msd_flag", true);
+  out_stretch_flag  = input_file("out_stretch_flag", false);
+  out_gyration_flag = input_file("out_gyration_flag", false);
+  out_com_flag      = input_file("out_com_flag", false);
+
+  if(comm_in.rank() == 0){
+
+    printf ("##########################################################\n"
+            "#                 Run information                         \n"
+            "##########################################################\n\n");
+    printf("  with_brownian:  %s\n", with_brownian ? "True" : "False");
+    if(with_brownian){
+      printf("  random_seed = %d\n"
+             "  dt0 = %.4e\n",
+             random_seed, dt0);
+    }
+    printf("  adaptive_dt: %s\n", adaptive_dt ? "True" : "False");
+    printf("  max_dr_coeff = %.4e\n", max_dr_coeff);
+    printf("  write interval: %d\n", write_interval);
+    printf("  Restart mode: %s\n", restart ? "True" : "False");
+    printf("  restart step =  %d\n  restart time = %.4e\n", restart_step, restart_time);
+    printf("  nstep = %d\n  write_interval = %d\n", nstep, write_interval);
+  } // end if (comm_in.rank() == 0)
+
+} // end read_run_info()
+
+} // end namespace
+
 
 
 
