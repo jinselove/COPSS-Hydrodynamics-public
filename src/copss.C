@@ -97,6 +97,7 @@ void Copss::read_data(std::string control_file)
   this -> read_geometry_info();
   this -> read_mesh_info();
   this -> read_force_info();
+  this -> read_ggem_info();
 } // end read_data function
 
 
@@ -311,10 +312,19 @@ void Copss::read_force_info(){
   } // end if comm_in.rank() == 0
 } // end read_force_info()
 
-  /*
-   * read GGEM info
-   */
-  void Copss::read_ggem_info(){}
+/*
+ * read GGEM info
+ */
+void Copss::read_ggem_info(){
+  alpha                = input_file("alpha", 0.1);
+  if(comm_in.rank() == 0){
+    printf("##########################################################\n"
+           "#                 GGEM information                       \n"
+           "##########################################################\n\n"
+           "  The smoothing parameter in GGEM alpha = %.4e\n" 
+           "  Recommend meshsize <= %.4e\n", alpha, 1./(std::sqrt(2)*alpha));
+  }
+}
 
   /*
    * read Stokes Solver  

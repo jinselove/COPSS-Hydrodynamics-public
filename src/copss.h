@@ -153,7 +153,7 @@ protected:
   /*
    * read GGEM info
    */
-  virtual void read_ggem_info();
+  virtual void read_ggem_info() final;
 
   /*
    * read Stokes Solver  
@@ -217,6 +217,9 @@ protected:
   unsigned int num_pw_forces;
   std::vector<std::string> pw_force_types;
   std::vector<ForceField::type_force> pw_forces;
+
+  // GGEM info
+  Real alpha;
 
 
 
