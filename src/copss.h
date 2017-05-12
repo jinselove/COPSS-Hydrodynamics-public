@@ -138,7 +138,7 @@ protected:
    * Read Geometry infomation
    */
 
-  virtual void read_geometry();
+  virtual void read_geometry() final;
 
   /*
    * Read mesh
