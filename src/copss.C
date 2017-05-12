@@ -96,6 +96,7 @@ void Copss::read_data(std::string control_file)
   this -> read_particle_info();
   this -> read_geometry_info();
   this -> read_mesh_info();
+  this -> read_force_info();
 } // end read_data function
 
 
@@ -251,7 +252,64 @@ void Copss::read_mesh_info(){
   /*
    * read force types
    */
-  void Copss::read_force_info(){}
+void Copss::read_force_info(){
+
+  // read particle-particle force types
+  num_pp_forces = input_file.vector_variable_size("particle_particle_force_types");
+  pp_force_types.resize(num_pp_forces);
+  pp_forces.resize(num_pp_forces);
+  for (unsigned int i=0; i < num_pp_forces; i++){    
+    pp_force_types[i] = input_file("particle_particle_force_types", "nothing", i);
+    std::vector<Real> params(input_file.vector_variable_size(pp_force_types[i]));
+    if(pp_force_types[i] != "nothing"){
+      for (unsigned int j = 0; j < params.size(); j++){
+        params[j] = input_file(pp_force_types[i],0.0,j);
+      }
+    }
+    pp_forces[i].first = pp_force_types[i];
+    pp_forces[i].second = params;
+  }
+
+    // read particle-wall force types
+  num_pw_forces = input_file.vector_variable_size("particle_wall_force_types");
+  pw_force_types.resize(num_pw_forces);
+  pw_forces.resize(num_pw_forces);
+  for (unsigned int i=0; i < num_pw_forces; i++){    
+    pw_force_types[i] = input_file("particle_wall_force_types", "nothing" , i);
+    std::vector<Real> params(input_file.vector_variable_size(pw_force_types[i]));
+    if(pw_force_types[i] != "nothing"){
+      for (unsigned int j = 0; j < params.size(); j++){
+        params[j] = input_file(pw_force_types[i],0.0,j);
+      }
+    }
+    pw_forces[i].first = pw_force_types[i];
+    pw_forces[i].second = params;
+  } 
+  if(comm_in.rank() == 0){
+    printf("##########################################################\n"
+          "#    Force information (particle-particle)                \n"
+          "##########################################################\n\n");
+    for (int i = 0; i < num_pp_forces; i++){
+      printf ("  ");
+      printf("%s  ", pp_forces[i].first.c_str());
+      for (int j = 0; j < pp_forces[i].second.size(); j++){
+        printf("%.6e  ", pp_forces[i].second[j]);      
+      }
+      printf("\n");
+    }
+    printf("##########################################################\n"
+          "#    Force information (particle-wall)                \n"
+          "##########################################################\n\n");
+    for (int i = 0; i < num_pw_forces; i++){
+      printf ("  ");
+      printf("%s  ", pw_forces[i].first.c_str());
+      for (int j = 0; j < pw_forces[i].second.size(); j++){
+        printf("%.6e  ", pw_forces[i].second[j]);      
+      }
+      printf("\n");
+    }
+  } // end if comm_in.rank() == 0
+} // end read_force_info()
 
   /*
    * read GGEM info

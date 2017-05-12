@@ -148,7 +148,7 @@ protected:
   /*
    * read force types
    */
-  virtual void read_force_info();
+  virtual void read_force_info() final;
 
   /*
    * read GGEM info
@@ -209,6 +209,16 @@ protected:
   bool generate_mesh; // flag to generate mesh or load mesh
   std::string domain_mesh_file; // domain mesh filename
   std::vector<Real> n_mesh; // mesh size in all directions
+
+  // Force information
+  unsigned int num_pp_forces;
+  std::vector<std::string> pp_force_types;
+  std::vector<ForceField::type_force> pp_forces;
+  unsigned int num_pw_forces;
+  std::vector<std::string> pw_force_types;
+  std::vector<ForceField::type_force> pw_forces;
+
+
 
 };
 
