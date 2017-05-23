@@ -1,4 +1,4 @@
-#include "general_point_particle_system.h"
+#include "copss_point_particle_system.h"
 
 using std::cout;
 using std::endl;
@@ -6,20 +6,17 @@ using std::string;
 
 namespace libMesh{
 
-
-GeneralPointParticleSystem::GeneralPointParticleSystem(int argc, char** argv)
+//==========================================================================
+CopssPointParticleSystem::CopssPointParticleSystem(int argc, char** argv)
 	:Copss(argc, argv)
 {
 	// do nothing
 }
 
 
-void GeneralPointParticleSystem::build_system(){
-	this -> read_data("polymer_control.in");
-}
 
-
-void GeneralPointParticleSystem::read_particle_info(){
+//==========================================================================
+void CopssPointParticleSystem::read_particle_info(){
 
 	const string particle_type = input_file("particle_type","other");
 	if(particle_type != "point_particle" and particle_type != "finite_size_particle"){

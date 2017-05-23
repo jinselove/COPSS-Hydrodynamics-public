@@ -25,13 +25,12 @@ using std::string;
 
 namespace libMesh{
 
-class GeneralPointParticleSystem : public Copss
+class CopssPointParticleSystem : public Copss
 {
 public:
 	
-	GeneralPointParticleSystem (int argc, char** argv);
+	CopssPointParticleSystem (int argc, char** argv);
 
-	void build_system();
 
 protected:
 	std::string particle_type; // particle type (either finite_size_particle or point_particle)

@@ -76,109 +76,15 @@ namespace libMesh{
 class Copss
 {
 public: 
-
-  // class constructor 
-  Copss(int argc, char** argv);
   
-  /* 
-   * Check libmesh support
-   * PETSC or laspack
-   * SLEPC
-   * AMR
-   * at least 2D
-  */
-  int check_libmesh();
-
-  /*
-   * Print out start time
-   */ 
-  void start_time(struct tm * timeinfo);
-
-  /*
-   * Print out end time
-   */ 
-  void end_time(struct tm * timeinfo);
-
-
-
-
-
-
-protected:
-
-  /*
-   * This function will be overriden later in inheritance class
-   * This function contains all we need to build a new system
-   */ 
-  virtual void build_system();
-
-  /*
-   * Read input parameters
-   */ 
-
-  //virtual void read_data(std::string control_file) = 0;
-  virtual void read_data(std::string control_file) ;
-
-  /*
-   * Read test_name
-   */
-  virtual void read_test_info();
-
-  /*
-   * Read physical parameters
-   */
-  virtual void read_physical_info();
-
-  /*
-   * Read physical parameters (will be overriden in derived class)
-   */
-  virtual void read_particle_info() = 0;
-
-  /*
-   * Read Geometry infomation
-   */
-
-  virtual void read_geometry_info();
-
-  /*
-   * Read mesh
-   */
-  virtual void read_mesh_info();
-
-  /*
-   * read force types
-   */
-  virtual void read_force_info();
-
-  /*
-   * read GGEM info
-   */
-  virtual void read_ggem_info();
-
-  /*
-   * read Stokes Solver  
-   */
-  virtual void read_stokes_solver_info();
-
-  /*
-   * read Chebyshev info
-   */
-  virtual void read_chebyshev_info();
-
-  /*
-   * read run time info 
-   */
-  virtual void read_run_info();
-
-
-  //protected variables
-
   // PETSC MPI communicator
   Parallel::Communicator comm_in;
   // error message string
   std::string error_msg;
   // control file object
   GetPot input_file;
+  // control file name
+  std::string control_fileName;
   // test name
   std::string test_name;
   // physical parameters
@@ -253,6 +159,101 @@ protected:
   unsigned int write_interval; // output file write interval
 
   bool write_es, out_msd_flag, out_stretch_flag, out_gyration_flag, out_com_flag;
+
+
+
+  // class constructor 
+  Copss(int argc, char** argv);
+  
+  /* 
+   * Check libmesh support
+   * PETSC or laspack
+   * SLEPC
+   * AMR
+   * at least 2D
+  */
+  int check_libmesh();
+
+  /*
+   * Print out start time
+   */ 
+  void start_time(struct tm * timeinfo);
+
+  /*
+   * Print out end time
+   */ 
+  void end_time(struct tm * timeinfo);
+
+  /*
+   * This function will be overriden later in inheritance class
+   * This function contains all we need to build a new system
+   */ 
+  virtual void init_system(std::string input_file);
+
+  // virtual void integrate();
+
+
+protected:
+
+  /*
+   * input file processing
+   */ 
+
+  void read_input();
+
+  /*
+   * Read test_name
+   */
+  void read_system_info();
+
+  /*
+   * Read physical parameters
+   */
+  void read_physical_info();
+
+  /*
+   * Read physical parameters (will be overriden in derived class)
+   */
+  virtual void read_particle_info() = 0;
+
+  /*
+   * Read Geometry infomation
+   */
+
+  void read_geometry_info();
+
+  /*
+   * Read mesh
+   */
+  void read_mesh_info();
+
+  /*
+   * read force types
+   */
+  void read_force_info();
+
+  /*
+   * read GGEM info
+   */
+  void read_ggem_info();
+
+  /*
+   * read Stokes Solver  
+   */
+  void read_stokes_solver_info();
+
+  /*
+   * read Chebyshev info
+   */
+  void read_chebyshev_info();
+
+  /*
+   * read run time info 
+   */
+  void read_run_info();
+
+
+  //protected variables
 
 
 

@@ -86,16 +86,17 @@ void Copss::end_time(struct tm * timeinfo){
 }
 
 //====================================================================
-void Copss::build_system(){
-
+void Copss::init_system(std::string _control_fileName){
+   control_fileName = _control_fileName;
+   this -> read_input();
 }
 
 //====================================================================
-void Copss::read_data(std::string control_file)
+void Copss::read_input()
 {
-  const GetPot tmp(control_file);
+  const GetPot tmp(control_fileName);
   input_file = tmp;
-  this -> read_test_info();
+  this -> read_system_info();
   this -> read_physical_info();
   this -> read_particle_info();
   this -> read_geometry_info();
@@ -109,7 +110,7 @@ void Copss::read_data(std::string control_file)
 
 
 //====================================================================
-void Copss::read_test_info()
+void Copss::read_system_info()
   {
     test_name = input_file("test_name", "validation");
 
