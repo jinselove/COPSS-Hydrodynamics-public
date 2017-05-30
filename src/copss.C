@@ -22,13 +22,13 @@ namespace libMesh
 {
 
 //==========================================================================
-Copss::Copss(int argc,char** argv)
+Copss::Copss(const CopssInit& init)
 {
-	LibMeshInit init(argc, argv);
+  //mpi_initialized = 1;
+
+  comm_in = init.comm();
 
 	this -> check_libmesh();
-
-	comm_in = init.comm();
 
 }
 
@@ -52,7 +52,7 @@ int Copss::check_libmesh(){
   #endif
   
   // Skip this 2D example if libMesh was compiled as 1D-only.
-  libmesh_example_requires(2 <= LIBMESH_DIM, "2D/3D support");
+  libmesh_example_requires(3 == LIBMESH_DIM, "--3D support");
 
   return 0;
 }
@@ -89,6 +89,7 @@ void Copss::end_time(struct tm * timeinfo){
 void Copss::init_system(std::string _control_fileName){
    control_fileName = _control_fileName;
    this -> read_input();
+   this -> create_object_mesh();
 }
 
 //====================================================================
@@ -99,15 +100,13 @@ void Copss::read_input()
   this -> read_system_info();
   this -> read_physical_info();
   this -> read_particle_info();
-  this -> read_geometry_info();
-  this -> read_mesh_info();
+  this -> read_domain_info();
   this -> read_force_info();
   this -> read_ggem_info();
   this -> read_stokes_solver_info();
   this -> read_chebyshev_info();
   this -> read_run_info();
 } // end read_data function
-
 
 //====================================================================
 void Copss::read_system_info()
@@ -131,6 +130,7 @@ void Copss::read_physical_info()
   kBT    = kB * T; //(N*um)
   viscosity            = input_file("viscosity", 1.0); // viscosity (cP = N*s/um^2)
   Rb                   = input_file("radius", 0.10); // radius of the bead (um)
+  particle_type = input_file("particle_type", "other");
   drag_c      = 6.*PI*viscosity*Rb;    // Drag coefficient (N*s/um)
   Db          = kBT/drag_c;     // diffusivity of a bead (um^2/s)  
 
@@ -163,7 +163,7 @@ void Copss::read_physical_info()
    * Read Geometry infomation
    */
 
-void Copss::read_geometry_info()
+void Copss::read_domain_info()
 {
   dim = input_file("dimension", 3);
   //=============== wall type and wall params
@@ -174,6 +174,9 @@ void Copss::read_geometry_info()
       wall_params[j] = input_file(wall_type,0.0,j);
     }
   }
+
+
+
   else{
     error_msg = "wall_type undefined; please check the wall_type definition in control file (1. wall_type; 2. wall_params)";
     PMToolBox::output_message(error_msg, comm_in);
@@ -225,26 +228,18 @@ void Copss::read_geometry_info()
       printf("%s (pressure = %.4e), ", periodicity[i] ? "Ture" : "False", inlet_pressure[i]); 
     }
     printf("\n");
-  } // end if comm_in.rank() == 0
-} // end read_geometry()
-
-  /*
-   * Read mesh
-   */
-void Copss::read_mesh_info(){
-  if(comm_in.rank() == 0){
-  printf("##########################################################\n"
-         "#                   Mesh information                      \n"
+    printf("##########################################################\n"
+         "#                   Domain mesh information                      \n"
          "##########################################################\n\n");
-  }
+  } // end if (comm_in.rank = 0)
 
   generate_mesh = input_file("generate_mesh", false); 
   if (generate_mesh){
     n_mesh.resize(input_file.vector_variable_size("n_mesh"));
-    for (unsigned int i=0; i < n_mesh.size(); i++){ n_mesh[i] = input_file("n_mesh", 10, i); }
+    for (unsigned int i=0; i < n_mesh.size(); i++){ n_mesh[i] = input_file("n_mesh", 1, i); }
     if(comm_in.rank() == 0){
       printf(" Generate Mesh:  n_mesh = ");
-      for (int i = 0 ; i < dim; i++) printf("%.2e, ",n_mesh[i]);
+      for (int i = 0 ; i < dim; i++) printf("%d, ",n_mesh[i]);
       printf("\n");
     } // end if comm_in.rank() == 0
   }
@@ -255,7 +250,7 @@ void Copss::read_mesh_info(){
     } // end if comm_in.rank() == 0  
   } // end else
 
-} // end read_mesh_info()
+} // end read_domain_info()
 
 
   /*
@@ -464,6 +459,98 @@ void Copss::read_run_info(){
   } // end if (comm_in.rank() == 0)
 
 } // end read_run_info()
+
+//============================================================================
+void Copss::create_domain_mesh()
+{
+  if(dim == 2) {
+    error_msg = "Copss::create_mesh() only works for 3D systems; 2D simulation needs extra implementation";
+    PMToolBox::output_message(error_msg, comm_in);
+    libmesh_error();
+  }
+  SerialMesh _mesh(comm_in);
+  if(generate_mesh and wall_type == "slit"){      
+        const Real meshsize_x   = (wall_params[1] - wall_params[0])/Real( n_mesh[0] );
+        const Real meshsize_y   = (wall_params[3] - wall_params[2])/Real( n_mesh[1] );
+        const Real meshsize_z   = (wall_params[5] - wall_params[4])/Real( n_mesh[2] );
+//        cout << "mesh_size = " <<meshsize_x  << "; "<<meshsize_y << "; "<<meshsize_z << endl;      
+        min_mesh_size           = std::min(meshsize_x, meshsize_y);
+        min_mesh_size           = std::min(min_mesh_size, meshsize_z);
+        max_mesh_size           = std::max(meshsize_x, meshsize_y);
+        max_mesh_size           = std::max(max_mesh_size, meshsize_z);
+        if(comm_in.rank() == 0){
+        printf("##########################################################\n"
+               "#             The created mesh information                \n"
+               "##########################################################\n\n"
+               "   nx_mesh = %d, Lx = %.4e, hx = %.4e\n"
+               "   ny_mesh = %d, Ly = %.4e, hy = %.4e\n"
+               "   nz_mesh = %d, Lz = %.4e, hz = %.4e\n"
+               "   minimum mesh size of fluid: hmin = %.4e\n"
+               "   maximum mesh size of fliud: hmax = %.4e\n",
+               n_mesh[0], wall_params[1]-wall_params[0], meshsize_x,
+               n_mesh[1], wall_params[3]-wall_params[2], meshsize_y,
+               n_mesh[2], wall_params[5]-wall_params[4], meshsize_z,
+               min_mesh_size, max_mesh_size);
+        }
+     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     * Create a mesh, distributed across the default MPI communicator.
+     * We build a mesh with Quad9(8) elements for 2D and HEX27(20) element for 3D
+    / - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+        if(dim==2)
+        {
+        MeshTools::Generation::build_square (_mesh, n_mesh[0], n_mesh[1],
+                                           wall_params[0], wall_params[1], wall_params[2], wall_params[3], QUAD8);        // QUAD8/9
+        }else{
+          // PMToolBox::output_message("create_domain_mesh(), test2\n", comm_in);
+          MeshTools::Generation::build_cube (_mesh, n_mesh[0], n_mesh[1], n_mesh[2],
+                                            wall_params[0], wall_params[1], wall_params[2], wall_params[3], wall_params[4], wall_params[5], HEX20);  // HEX20/27
+        // PMToolBox::output_message("create_domain_mesh(), test3\n", comm_in);
+        }
+    }// end if (generate_mesh)
+    else if(domain_mesh_file != "nothing"){
+          _mesh.read(domain_mesh_file);    
+          _mesh.all_second_order();
+          _mesh.prepare_for_use();
+          const std::vector<Real> mesh_size = PMToolBox::mesh_size(_mesh);
+          min_mesh_size = mesh_size[0];
+          max_mesh_size = mesh_size[1];
+          if(comm_in.rank() == 0){
+            printf("--------------> Read finite element mesh:...\n"  
+                   "##########################################################\n"
+                   "#                 The Read-in mesh information            \n"
+                   "##########################################################\n\n"
+                   "   minimum mesh size of fluid: hmin = %.4e\n"
+                   "   maximum mesh size of fliud: hmax = %.4e\n",
+                   min_mesh_size, max_mesh_size);
+          }
+    }
+    else{
+          error_msg = "domain_mesh_file has to be specified";
+          PMToolBox::output_message(error_msg, comm_in);
+          libmesh_error();
+    } 
+    mesh = &_mesh;
+    mesh -> print_info();
+} // end function
+
+//============================================================================
+void Copss::create_periodic_boundary(){
+  if(wall_type != "slit"){
+    error_msg = "Copss::create_periodic_boundary() only works for wall_type = 'slit'";
+    PMToolBox::output_message(error_msg, comm_in);
+    libmesh_error();
+  }
+  const Point bbox_pmin(wall_params[0], wall_params[2], wall_params[4]);
+  const Point bbox_pmax(wall_params[1], wall_params[3], wall_params[5]);
+  // construct PMPeriodicBoundary class using info above
+  PMPeriodicBoundary _pm_periodic_boundary(bbox_pmin, bbox_pmax, periodicity, inlet, inlet_pressure);
+  pm_periodic_boundary = &_pm_periodic_boundary;
+} // end function
+
+
+
+
+
 
 } // end namespace
 

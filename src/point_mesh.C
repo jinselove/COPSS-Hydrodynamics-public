@@ -862,22 +862,20 @@ template <unsigned int KDDim>
 void PointMesh<KDDim>::reinit()
 {
   START_LOG ("reinit()", "PointMesh<KDDim>");
-//  std::string msg = "PointMesh::reinit(): Re-initialize the PointMesh ...";
-//  PMToolBox::output_message(msg,this->comm());
+  // std::string msg = "PointMesh::reinit(): Re-initialize the PointMesh ...";
+  // PMToolBox::output_message(msg,_mesh.comm());
+
   
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    if the KD tree is already built, we need to re-construct the KD tree in reinit()
    This is necessary at each time step when particles move!
    FIXME: is this necessary when the total number of particles does not change?
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  if ( _kd_tree.get() )
-    this->clear_kd_tree();
-  
+  if ( _kd_tree.get() ) this->clear_kd_tree();
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Then we re-construct the kd-tree after clearing it!
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  this->construct_kd_tree();
-  
+  this->construct_kd_tree();  
   
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Construct the particle-particle, elem-particle neighbor list and particle force.
@@ -894,7 +892,9 @@ void PointMesh<KDDim>::reinit()
      get the neighbor indices & distance values
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     const Point &tgt( _particles[j]->point() );
+
     std::vector<std::pair<std::size_t,Real> > IndicesDists0, IndicesDists;
+
     this->build_particle_neighbor_list(tgt, _is_sorted, IndicesDists);
     /* IndicesDists above returns <particle_id, distance>! */
     
@@ -903,17 +903,17 @@ void PointMesh<KDDim>::reinit()
      does NOT contain itself.
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     const std::size_t pid = _particles[j]->id();
+
     for (std::size_t i=0; i<IndicesDists.size(); ++i){
       if ( IndicesDists[i].first!= pid){
         IndicesDists0.push_back( IndicesDists[i] );
       }
     }
-    
+
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      set the neighbor list of the j-th particle
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     _particles[j]->set_neighbor_list (IndicesDists0);
-    
     
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      FIXME: Check if the j-th point particle is out of domain
@@ -921,12 +921,11 @@ void PointMesh<KDDim>::reinit()
     
   } // end for j-loop over particles
   
-  
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Construct the element-particle neighbor list and particle-element id map
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   this->build_elem_neighbor_list();
-  
+
   STOP_LOG ("reinit()", "PointMesh<KDDim>");
 }
 

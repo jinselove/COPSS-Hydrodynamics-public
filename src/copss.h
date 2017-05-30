@@ -62,6 +62,7 @@
 #include "random_generator.h"
 #include "stokes_solver.h"
 #include "ggem_system.h"
+#include "copss_init.h"
 
 
 /*! This file serves as a template to build\solve a Stokes system
@@ -76,11 +77,12 @@ namespace libMesh{
 class Copss
 {
 public: 
-  
   // PETSC MPI communicator
   Parallel::Communicator comm_in;
   // error message string
   std::string error_msg;
+  // output message string
+  std::string output_msg;
   // control file object
   GetPot input_file;
   // control file name
@@ -96,6 +98,7 @@ public:
   Real Rb; // radius of the bead
   Real drag_c; // Drag coefficient (N*s/um)
   Real Db;
+  std::string particle_type;
 
   // characteristic variables
   Real tc; // characteristic time (diffusion time) (s)
@@ -114,7 +117,7 @@ public:
   // Mesh information
   bool generate_mesh; // flag to generate mesh or load mesh
   std::string domain_mesh_file; // domain mesh filename
-  std::vector<Real> n_mesh; // mesh size in all directions
+  std::vector<unsigned int> n_mesh; // mesh size in all directions
 
   // Force information
   unsigned int num_pp_forces;
@@ -157,13 +160,17 @@ public:
   Real restart_time; // real time at restart step
   unsigned int nstep; // totol number of steps to run
   unsigned int write_interval; // output file write interval
-
   bool write_es, out_msd_flag, out_stretch_flag, out_gyration_flag, out_com_flag;
 
+  // mesh
+  SerialMesh* mesh;
+  Real min_mesh_size, max_mesh_size;
 
+  //periodic boundary
+  PMPeriodicBoundary* pm_periodic_boundary;
 
-  // class constructor 
-  Copss(int argc, char** argv);
+  // class constructor
+  Copss(const CopssInit& init);
   
   /* 
    * Check libmesh support
@@ -188,72 +195,43 @@ public:
    * This function will be overriden later in inheritance class
    * This function contains all we need to build a new system
    */ 
-  virtual void init_system(std::string input_file);
-
-  // virtual void integrate();
-
-
-protected:
-
-  /*
-   * input file processing
-   */ 
-
+  void init_system(std::string input_file); // including the following 10 steps
+  // (1/10) read all the input information from "input_file"
   void read_input();
-
-  /*
-   * Read test_name
-   */
-  void read_system_info();
-
-  /*
-   * Read physical parameters
-   */
-  void read_physical_info();
-
-  /*
-   * Read physical parameters (will be overriden in derived class)
-   */
+  // (2/10) system name 
+  void read_system_info(); 
+  // (3/10) physical parameters
+  void read_physical_info(); 
+  // (4/10) information about particles
   virtual void read_particle_info() = 0;
+  // (5/10) domain information, including geometry and mesh 
+  void read_domain_info(); 
+  // (6/10) force types, including particle-particle and particle-wall
+  void read_force_info(); 
+  // (7/10) ggem information
+  void read_ggem_info(); 
+  //(8/10) stokes solver control parameter
+  void read_stokes_solver_info(); 
+  // (9/10) chebyshev parameter
+  void read_chebyshev_info(); 
+  // (10/10) running parameter
+  void read_run_info(); 
+
 
   /*
-   * Read Geometry infomation
+   * Create object_mesh 
+   * this object_mesh can be point_mesh or particle_mesh
+   * which be defined in corresponding derived classes.
    */
 
-  void read_geometry_info();
-
-  /*
-   * Read mesh
-   */
-  void read_mesh_info();
-
-  /*
-   * read force types
-   */
-  void read_force_info();
-
-  /*
-   * read GGEM info
-   */
-  void read_ggem_info();
-
-  /*
-   * read Stokes Solver  
-   */
-  void read_stokes_solver_info();
-
-  /*
-   * read Chebyshev info
-   */
-  void read_chebyshev_info();
-
-  /*
-   * read run time info 
-   */
-  void read_run_info();
-
-
-  //protected variables
+  // generate or create domain mesh
+  void create_domain_mesh();
+  // create domain periodic box
+  void create_periodic_boundary();
+  // create object
+  virtual void create_object() = 0;
+  // create object_mesh (point_mesh or particle_mesh)
+  virtual void create_object_mesh() = 0;
 
 
 

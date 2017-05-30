@@ -6,32 +6,34 @@ using std::string;
 
 namespace libMesh{
 
-//==========================================================================
-CopssPointParticleSystem::CopssPointParticleSystem(int argc, char** argv)
-	:Copss(argc, argv)
-{
-	// do nothing
-}
 
+
+//==========================================================================
+CopssPointParticleSystem::CopssPointParticleSystem(CopssInit& init)
+:Copss(init)
+{
+
+}
 
 
 //==========================================================================
 void CopssPointParticleSystem::read_particle_info(){
-
-	const string particle_type = input_file("particle_type","other");
-	if(particle_type != "point_particle" and particle_type != "finite_size_particle"){
-		error_msg = "	Invalid particle_type !!!";
-		libmesh_error();    
-	}       
+	if (particle_type != "point_particle"){
+		error_msg = "invalid particle type ("+particle_type+") defined\n";
+		PMToolBox::output_message(error_msg,comm_in);
+		libmesh_error();
+	}
 	point_particle_model	= input_file("point_particle_model", "other");
 	if(point_particle_model == "bead"){
 		Nb = input_file("Nb",21); // total # of point particles
 		Ns = Nb - 1;//we can look at these beads as a single chain without spring force. Just for development convinence
+		nBonds = Ns;
 	}
 	else if(point_particle_model == "polymer_chain"){
-	Nb = input_file("Nb", 21);// total # of beads
+		Nb = input_file("Nb", 21);// total # of beads
 		Ns = input_file("Ns", 20);// # of springs per Chain
 		nChains = Nb / (Ns+1);
+		nBonds = nChains * Ns;
 		bk = input_file("bk", 1E-6);//Kuhn length(um)
 		Nks = input_file("Nks", 1E-6);// # of Kuhn length per spring
 		Ss2 = Nks*bk*bk/6.; // (um^2)
@@ -40,9 +42,9 @@ void CopssPointParticleSystem::read_particle_info(){
 		Dc = Db / Real(Nb); // Diffusivity of the chain (um^2/s)
 	}
 	else{
-	error_msg = "	Invalid point_particle_model !!!";
-	PMToolBox::output_message(error_msg, comm_in);
-	libmesh_error();
+		error_msg = "	Invalid point_particle_model !!!";
+		PMToolBox::output_message(error_msg, comm_in);
+		libmesh_error();
 	}
 	//make sure we have the right combination of Nb and Ns
 	if((Nb % (Ns + 1)) != 0){
@@ -89,6 +91,65 @@ void CopssPointParticleSystem::read_particle_info(){
 		}
 	} // end if (comm_in.rank() == 0)
 }// end read_particle_parameter()
+
+
+//==========================================================================
+void CopssPointParticleSystem::create_object(){
+  const unsigned int chain_id = 0;
+  PolymerChain _polymer_chain(chain_id, *pm_periodic_boundary);
+  std::ostringstream pfilename;
+  if(restart)
+  {
+	pfilename << point_particle_model<<"_data_restart_"<< restart_step << ".vtk";
+	output_msg = "-------------> read "+point_particle_model+" data from "+pfilename.str()+ " in restart mode\n";
+	PMToolBox::output_message(output_msg, comm_in);	
+    _polymer_chain.read_data_vtk(pfilename.str());
+  } 
+  else
+  {
+	pfilename << "point_particle_data.in";
+	_polymer_chain.read_data_pizza(pfilename.str(), Nb, nBonds, comm_in.rank());
+	output_msg = "--------------> polymer_chain object is built for copss_point_particle_system using data from "+pfilename.str();
+	PMToolBox::output_message(output_msg, comm_in);
+	//comm_in.barrier();
+  }
+  polymer_chain = &_polymer_chain;
+  pfilename.str(""); pfilename.clear();
+}//end function
+
+//=====================================================================
+void CopssPointParticleSystem::create_object_mesh(){
+  // prepare domain and objects
+  this -> create_domain_mesh();
+  this -> create_periodic_boundary();
+  this -> create_object();
+
+  const Real search_radius_p = 4.0/alpha;
+  
+  const Real search_radius_e = 0.5*max_mesh_size + search_radius_p;
+ // PMToolBox::output_message("test2\n",comm_in);
+
+  PointMesh<3> _point_mesh(*mesh, *polymer_chain, search_radius_p, search_radius_e);
+ // PMToolBox::output_message("test3\n",comm_in);
+
+  _point_mesh.add_periodic_boundary(*pm_periodic_boundary);
+ // PMToolBox::output_message("test4\n",comm_in);
+
+  _point_mesh.reinit();
+  //  PMToolBox::output_message("test5\n",comm_in);
+
+  if(comm_in.rank() == 0){
+  	printf("-------------> Reinit point mesh object, finished! \n"
+  		   "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+		   "### The point-mesh info:\n"
+		   "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+		   "Total number of point particles: %d\n "
+		   "search_radius_p = %.4e, , search_radius_e = %.4e\n\n",
+		   _point_mesh.num_particles(), search_radius_p, search_radius_e);
+	_point_mesh.print_point_info();
+   }
+   point_mesh = &_point_mesh;
+} // end function
 
 
 

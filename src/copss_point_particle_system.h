@@ -18,6 +18,7 @@
 #pragma once
 
 #include "copss.h"
+#include "polymer_chain.h"
 
 using std::cout;
 using std::endl;
@@ -29,15 +30,14 @@ class CopssPointParticleSystem : public Copss
 {
 public:
 	
-	CopssPointParticleSystem (int argc, char** argv);
-
+	CopssPointParticleSystem (CopssInit& init);
 
 protected:
-	std::string particle_type; // particle type (either finite_size_particle or point_particle)
 	std::string point_particle_model;
-	// ===========for beads
+	// ===========for beads and polymer chains
 	unsigned int Nb; // total # of beads
 	unsigned int Ns; // total # of springs per Chain
+	unsigned int nBonds; // total # of springs/bonds
 	// ===========for polymer chains
 	unsigned int nChains; // total # of chains
 	Real bk; // Kuhn length (um)
@@ -50,6 +50,19 @@ protected:
 	//void read_data(std::string control_file){};
 	// override read_particle_parameters() function in Copss class
 	void read_particle_info () override;
+
+	// create objects, polymer chains
+	void create_object() override;
+
+	// create object mesh
+	void create_object_mesh() override;
+
+private:
+
+	PolymerChain* polymer_chain;
+	PointMesh<3>* point_mesh;
+
+
 
 
 };
