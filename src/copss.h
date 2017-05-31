@@ -169,11 +169,18 @@ public:
   //periodic boundary
   PMPeriodicBoundary* pm_periodic_boundary;
 
-  // class constructor
+  /*!
+   * class constructor
+   */
   Copss(const CopssInit& init);
+
+  /*!
+   * class destructor
+   */
+  ~Copss();
   
-  /* 
-   * Check libmesh support
+  /*! Check libmesh support
+   *
    * PETSC or laspack
    * SLEPC
    * AMR
@@ -181,59 +188,75 @@ public:
   */
   int check_libmesh();
 
-  /*
+  /*!
    * Print out start time
    */ 
   void start_time(struct tm * timeinfo);
 
-  /*
+  /*!
    * Print out end time
    */ 
   void end_time(struct tm * timeinfo);
 
-  /*
-   * This function will be overriden later in inheritance class
-   * This function contains all we need to build a new system
+  /*!
+   * Build and initialized an Equation system
+   * step 1: read_input()
+   * step 2: create_object_mesh() 
    */ 
   void init_system(std::string input_file); // including the following 10 steps
-  // (1/10) read all the input information from "input_file"
+
+  /*!
+   * Read input and create necessary objects
+   * step 1: read_system_info()
+   * step 2: read_physical_info()
+   * step 3: read_particle_info()
+   * step 4: read_domain_info()
+   * step 5: read_force_info()
+   * step 6: read_ggem_info()
+   * step 7: read_stokes_solver_info()
+   * step 8: read_chebyshev_info()
+   * step 9: read_run_info()
+   */
   void read_input();
-  // (2/10) system name 
-  void read_system_info(); 
-  // (3/10) physical parameters
-  void read_physical_info(); 
-  // (4/10) information about particles
-  virtual void read_particle_info() = 0;
-  // (5/10) domain information, including geometry and mesh 
-  void read_domain_info(); 
-  // (6/10) force types, including particle-particle and particle-wall
-  void read_force_info(); 
-  // (7/10) ggem information
-  void read_ggem_info(); 
-  //(8/10) stokes solver control parameter
-  void read_stokes_solver_info(); 
-  // (9/10) chebyshev parameter
-  void read_chebyshev_info(); 
-  // (10/10) running parameter
-  void read_run_info(); 
 
-
-  /*
+  
+  /*! 
    * Create object_mesh 
    * this object_mesh can be point_mesh or particle_mesh
-   * which be defined in corresponding derived classes.
+   * step 1: create_domain_mesh()
+   * step 2: create_periodid_boundary()
+   * step 3: create_object()
+   * step 4: create object_mesh by combining domain mesh, object and periodic boundary
    */
-
-  // generate or create domain mesh
-  void create_domain_mesh();
-  // create domain periodic box
-  void create_periodic_boundary();
-  // create object
-  virtual void create_object() = 0;
-  // create object_mesh (point_mesh or particle_mesh)
   virtual void create_object_mesh() = 0;
 
+  /*! 
+   * Create equation_system object
+   */
+  // virtual void 
 
+
+protected:
+  /*!
+   * Steps for read_input() 
+   */
+
+  void read_system_info(); 
+  void read_physical_info(); 
+  virtual void read_particle_info() = 0;
+  void read_domain_info(); 
+  void read_force_info(); 
+  void read_ggem_info(); 
+  void read_stokes_solver_info(); 
+  void read_chebyshev_info(); 
+  void read_run_info(); 
+
+  /*!
+   * Steps for create_object_mesh()
+   */
+  void create_domain_mesh();
+  void create_periodic_boundary();
+  virtual void create_object() = 0;
 
 
 };

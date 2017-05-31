@@ -32,6 +32,8 @@ public:
 	
 	CopssPointParticleSystem (CopssInit& init);
 
+	~CopssPointParticleSystem();
+
 protected:
 	std::string point_particle_model;
 	// ===========for beads and polymer chains

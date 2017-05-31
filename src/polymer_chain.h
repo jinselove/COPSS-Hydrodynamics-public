@@ -118,12 +118,12 @@ public:
  * !filename	    ---> where you want to output the polymer data you generated.
  */
  void generate_polymer_chains(const unsigned int n_beads,
-                                           const unsigned int n_chains,
-                                           const Real init_bondLength, 
-                                           const Point init_bbox_min,
-                                           const Point init_bbox_max,
-                                           const std::string& filename,
-					   unsigned int comm_in_rank);
+                             const unsigned int n_chains,
+                             const Real init_bondLength, 
+                             const Point init_bbox_min,
+                             const Point init_bbox_max,
+                             const std::string& filename,
+                             unsigned int comm_in_rank);
 
 
  

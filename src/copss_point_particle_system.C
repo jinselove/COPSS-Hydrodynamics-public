@@ -15,6 +15,13 @@ CopssPointParticleSystem::CopssPointParticleSystem(CopssInit& init)
 
 }
 
+CopssPointParticleSystem::~CopssPointParticleSystem(){
+	delete polymer_chain;
+	delete point_mesh;
+	polymer_chain = NULL;
+	point_mesh = NULL;
+}
+
 
 //==========================================================================
 void CopssPointParticleSystem::read_particle_info(){
@@ -96,24 +103,23 @@ void CopssPointParticleSystem::read_particle_info(){
 //==========================================================================
 void CopssPointParticleSystem::create_object(){
   const unsigned int chain_id = 0;
-  PolymerChain _polymer_chain(chain_id, *pm_periodic_boundary);
+  polymer_chain = new PolymerChain (chain_id, *pm_periodic_boundary);
   std::ostringstream pfilename;
   if(restart)
   {
 	pfilename << point_particle_model<<"_data_restart_"<< restart_step << ".vtk";
 	output_msg = "-------------> read "+point_particle_model+" data from "+pfilename.str()+ " in restart mode\n";
 	PMToolBox::output_message(output_msg, comm_in);	
-    _polymer_chain.read_data_vtk(pfilename.str());
+    polymer_chain->read_data_vtk(pfilename.str());
   } 
   else
   {
 	pfilename << "point_particle_data.in";
-	_polymer_chain.read_data_pizza(pfilename.str(), Nb, nBonds, comm_in.rank());
+	polymer_chain->read_data_pizza(pfilename.str(), Nb, nBonds, comm_in.rank());
 	output_msg = "--------------> polymer_chain object is built for copss_point_particle_system using data from "+pfilename.str();
 	PMToolBox::output_message(output_msg, comm_in);
 	//comm_in.barrier();
   }
-  polymer_chain = &_polymer_chain;
   pfilename.str(""); pfilename.clear();
 }//end function
 
@@ -124,19 +130,15 @@ void CopssPointParticleSystem::create_object_mesh(){
   this -> create_periodic_boundary();
   this -> create_object();
 
+  // create object mesh
   const Real search_radius_p = 4.0/alpha;
-  
   const Real search_radius_e = 0.5*max_mesh_size + search_radius_p;
- // PMToolBox::output_message("test2\n",comm_in);
 
-  PointMesh<3> _point_mesh(*mesh, *polymer_chain, search_radius_p, search_radius_e);
- // PMToolBox::output_message("test3\n",comm_in);
+  point_mesh = new PointMesh<3> (*mesh, *polymer_chain, search_radius_p, search_radius_e);
 
-  _point_mesh.add_periodic_boundary(*pm_periodic_boundary);
- // PMToolBox::output_message("test4\n",comm_in);
+  point_mesh->add_periodic_boundary(*pm_periodic_boundary);
 
-  _point_mesh.reinit();
-  //  PMToolBox::output_message("test5\n",comm_in);
+  point_mesh->reinit();
 
   if(comm_in.rank() == 0){
   	printf("-------------> Reinit point mesh object, finished! \n"
@@ -145,10 +147,9 @@ void CopssPointParticleSystem::create_object_mesh(){
 		   "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
 		   "Total number of point particles: %d\n "
 		   "search_radius_p = %.4e, , search_radius_e = %.4e\n\n",
-		   _point_mesh.num_particles(), search_radius_p, search_radius_e);
-	_point_mesh.print_point_info();
+		   point_mesh->num_particles(), search_radius_p, search_radius_e);
+	point_mesh->print_point_info();
    }
-   point_mesh = &_point_mesh;
 } // end function
 
 

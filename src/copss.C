@@ -32,6 +32,14 @@ Copss::Copss(const CopssInit& init)
 
 }
 
+Copss::~Copss()
+{
+  delete mesh;
+  delete pm_periodic_boundary;
+  mesh = NULL;
+  pm_periodic_boundary = NULL;
+}
+
 
 int Copss::check_libmesh(){
 
@@ -468,7 +476,7 @@ void Copss::create_domain_mesh()
     PMToolBox::output_message(error_msg, comm_in);
     libmesh_error();
   }
-  SerialMesh _mesh(comm_in);
+  mesh = new SerialMesh (comm_in);
   if(generate_mesh and wall_type == "slit"){      
         const Real meshsize_x   = (wall_params[1] - wall_params[0])/Real( n_mesh[0] );
         const Real meshsize_y   = (wall_params[3] - wall_params[2])/Real( n_mesh[1] );
@@ -498,20 +506,18 @@ void Copss::create_domain_mesh()
     / - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
         if(dim==2)
         {
-        MeshTools::Generation::build_square (_mesh, n_mesh[0], n_mesh[1],
+        MeshTools::Generation::build_square (*mesh, n_mesh[0], n_mesh[1],
                                            wall_params[0], wall_params[1], wall_params[2], wall_params[3], QUAD8);        // QUAD8/9
         }else{
-          // PMToolBox::output_message("create_domain_mesh(), test2\n", comm_in);
-          MeshTools::Generation::build_cube (_mesh, n_mesh[0], n_mesh[1], n_mesh[2],
+          MeshTools::Generation::build_cube (*mesh, n_mesh[0], n_mesh[1], n_mesh[2],
                                             wall_params[0], wall_params[1], wall_params[2], wall_params[3], wall_params[4], wall_params[5], HEX20);  // HEX20/27
-        // PMToolBox::output_message("create_domain_mesh(), test3\n", comm_in);
         }
     }// end if (generate_mesh)
     else if(domain_mesh_file != "nothing"){
-          _mesh.read(domain_mesh_file);    
-          _mesh.all_second_order();
-          _mesh.prepare_for_use();
-          const std::vector<Real> mesh_size = PMToolBox::mesh_size(_mesh);
+          mesh->read(domain_mesh_file);    
+          mesh->all_second_order();
+          mesh->prepare_for_use();
+          const std::vector<Real> mesh_size = PMToolBox::mesh_size(*mesh);
           min_mesh_size = mesh_size[0];
           max_mesh_size = mesh_size[1];
           if(comm_in.rank() == 0){
@@ -529,7 +535,6 @@ void Copss::create_domain_mesh()
           PMToolBox::output_message(error_msg, comm_in);
           libmesh_error();
     } 
-    mesh = &_mesh;
     mesh -> print_info();
 } // end function
 
@@ -543,8 +548,8 @@ void Copss::create_periodic_boundary(){
   const Point bbox_pmin(wall_params[0], wall_params[2], wall_params[4]);
   const Point bbox_pmax(wall_params[1], wall_params[3], wall_params[5]);
   // construct PMPeriodicBoundary class using info above
-  PMPeriodicBoundary _pm_periodic_boundary(bbox_pmin, bbox_pmax, periodicity, inlet, inlet_pressure);
-  pm_periodic_boundary = &_pm_periodic_boundary;
+  
+  pm_periodic_boundary = new PMPeriodicBoundary(bbox_pmin, bbox_pmax, periodicity, inlet, inlet_pressure);
 } // end function
 
 

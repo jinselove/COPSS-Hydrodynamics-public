@@ -138,11 +138,12 @@ void PointParticle::reinit_particle()
   // reset int
   _processor_id = -1;
   _elem_id      = -1;
-  
+
   // reinit vectors
   this->zero_particle_force();
+
   _neighbor_list.clear();
-  
+
   // reinit orientation vector
 //  for(std::size_t i=0; i<_orientation.size(); ++i){
 //    _orientation[i] = 0.0;

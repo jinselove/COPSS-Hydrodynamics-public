@@ -863,7 +863,7 @@ void PointMesh<KDDim>::reinit()
 {
   START_LOG ("reinit()", "PointMesh<KDDim>");
   // std::string msg = "PointMesh::reinit(): Re-initialize the PointMesh ...";
-  // PMToolBox::output_message(msg,_mesh.comm());
+  // PMToolBox::output_message(msg,this->comm());
 
   
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -876,18 +876,17 @@ void PointMesh<KDDim>::reinit()
    Then we re-construct the kd-tree after clearing it!
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   this->construct_kd_tree();  
-  
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Construct the particle-particle, elem-particle neighbor list and particle force.
    Loop over ALL particles to calculate their neighbor lists and forces.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+  
   for (std::size_t j=0; j<_particles.size(); ++j)
   {
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Re-init the particle j
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     _particles[j]->reinit_particle();
-    
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      get the neighbor indices & distance values
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -897,7 +896,7 @@ void PointMesh<KDDim>::reinit()
 
     this->build_particle_neighbor_list(tgt, _is_sorted, IndicesDists);
     /* IndicesDists above returns <particle_id, distance>! */
-    
+
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Exclude the current particle itself, so that the particle's neighbor list
      does NOT contain itself.

@@ -16,7 +16,6 @@ int main (int argc, char **argv){
   timeinfo = localtime ( &rawtime );
 //	system.start_time(timeinfo);
 
-	system.init_system("polymer_control.in");
-  
-	return 0;
+  system.init_system("polymer_control.in");
+  return 0;
 }
