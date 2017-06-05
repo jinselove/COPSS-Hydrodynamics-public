@@ -108,19 +108,20 @@ If you meet any trouble, please refer to [SLEPC installation](http://slepc.upv.e
 
  - Compile the codes
  
-	 `cd /path/to/copss/examples/general_point_particle/` 
+	 `cd /path/to/copss/src/` 
 	 
 	 `make`
-	
-	You need to compile COPSS for each system, e.g., general_point_particle, before you run it. In the future, we will push more example systems.
 
  - Run the system
- 
-	 `cp /path/to/copss/tools/run.sh /path/to/copss/examples/general_point_particle/` 
+	 `cd /path/to/copss/examples/general_point_particle/`
+
+	`cp /path/to/copss/src/example-opt $PWD`	 
+
+	 `cp /path/to/copss/tools/run.sh $PWD` 
 
 	`bash run.sh` (You can define how many cores you want to run on in **run.sh**)
 	
-	You need to set up your system in **polymer_control.in** and **datafile (e.g., polymer_chain_data_1_chains.in)**. More details can be found in our documentation.
+	You need to set up your system in **polymer_control.in** and **datafile (e.g., point_particle_data.in)**. More details can be found in our documentation.
 
 
 **Build documentation**
