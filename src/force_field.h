@@ -83,7 +83,7 @@ public:
    * at each time step
    * The velocities of all beads are given
    */
-  virtual void reinit_force_field();
+  void reinit_force_field() override;
 
  
    /*

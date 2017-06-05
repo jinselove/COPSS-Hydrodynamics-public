@@ -408,13 +408,11 @@ void PMLinearImplicitSystem::reinit_system(const std::vector<Real>* vel_last_ste
   // (1) build the point-point neighbor list according to search radius;
   // (2) build the element-point neighbor list according to search radius;
   // (3) set the elem_id and proc_id for points
-  _point_mesh->reinit(); 
- 
+  _point_mesh->reinit();  
   // update the tracking points position on the mesh if needed
   if(_particle_mesh != NULL){
     _point_mesh->update_particle_mesh(_particle_mesh);
-  } 
-  
+  }   
   // re-compute the force field if there is any force_field attached
   if(_force_field != NULL)
   {
@@ -432,6 +430,8 @@ void PMLinearImplicitSystem::reinit_system(const std::vector<Real>* vel_last_ste
     }
   //  std::cout << "   force_field reinitialized .." << std::endl;
   }
+
+
   STOP_LOG("reinit_system()", "PMLinearImplicitSystem");
 }
 

@@ -47,6 +47,7 @@ void CopssPointParticleSystem::read_particle_info(){
 		q0 = Nks * bk;// maximum spring length (um)
 		chain_length = Ns * q0; // contour length of the spring (um)
 		Dc = Db / Real(Nb); // Diffusivity of the chain (um^2/s)
+    max_spring_len = q0/Rb;     // non-dimensional max spring length
 	}
 	else{
 		error_msg = "	Invalid point_particle_model !!!";
@@ -103,7 +104,8 @@ void CopssPointParticleSystem::read_particle_info(){
 //==========================================================================
 void CopssPointParticleSystem::create_object(){
   const unsigned int chain_id = 0;
-  polymer_chain = new PolymerChain (chain_id, *pm_periodic_boundary);
+  polymer_chain = new PolymerChain(chain_id, *pm_periodic_boundary);
+  //polymer_chain = std::unique_ptr<PolymerChain> (new PolymerChain (chain_id, *pm_periodic_boundary));
   std::ostringstream pfilename;
   if(restart)
   {
@@ -131,10 +133,11 @@ void CopssPointParticleSystem::create_object_mesh(){
   this -> create_object();
 
   // create object mesh
-  const Real search_radius_p = 4.0/alpha;
-  const Real search_radius_e = 0.5*max_mesh_size + search_radius_p;
+  search_radius_p = 4.0/alpha;
+  search_radius_e = 0.5*max_mesh_size + search_radius_p;
 
   point_mesh = new PointMesh<3> (*mesh, *polymer_chain, search_radius_p, search_radius_e);
+  //point_mesh = std::unique_ptr<PointMesh<3> >(new PointMesh<3> (*mesh, *polymer_chain, search_radius_p, search_radius_e));
 
   point_mesh->add_periodic_boundary(*pm_periodic_boundary);
 
@@ -148,10 +151,167 @@ void CopssPointParticleSystem::create_object_mesh(){
 		   "Total number of point particles: %d\n "
 		   "search_radius_p = %.4e, , search_radius_e = %.4e\n\n",
 		   point_mesh->num_particles(), search_radius_p, search_radius_e);
-	point_mesh->print_point_info();
-   }
+	  point_mesh->print_point_info();
+  }
 } // end function
 
 
+//==================================================================================
+void CopssPointParticleSystem::attach_object_mesh(PMLinearImplicitSystem& system)
+{
+	system.attach_point_mesh(point_mesh);
+}
+
+//======================================================================================
+void CopssPointParticleSystem::set_parameters(EquationSystems& equation_systems){
+  equation_systems.parameters.set<unsigned int>("linear solver maximum iterations") = max_linear_iterations;
+  equation_systems.parameters.set<Real> ("linear solver rtol") = linear_solver_rtol;
+  equation_systems.parameters.set<Real> ("linear solver atol") = linear_solver_atol;
+  equation_systems.parameters.set<bool>    ("user_defined_pc") = user_defined_pc;
+  equation_systems.parameters.set<bool>     ("schur_user_ksp") = schur_user_ksp;
+  equation_systems.parameters.set<Real>("schur_user_ksp_rtol") = schur_user_ksp_rtol;
+  equation_systems.parameters.set<Real>("schur_user_ksp_atol") = schur_user_ksp_atol;
+  equation_systems.parameters.set<string>    ("schur_pc_type") = schur_pc_type;
+  equation_systems.parameters.set<StokesSolverType> ("solver_type") = solver_type;
+  equation_systems.parameters.set<Real>              ("alpha") = alpha;
+  equation_systems.parameters.set<Real>         ("kBT")        = kBT;
+  equation_systems.parameters.set<Real>   ("fluid mesh size")  = min_mesh_size;
+  equation_systems.parameters.set<Real>       ("viscosity_0")  = muc;
+  equation_systems.parameters.set<Real>               ("br0")  = 1.0;
+  equation_systems.parameters.set<Real>               ("bk")   = bk;
+  equation_systems.parameters.set<Real>               ("q0")   = q0;
+  equation_systems.parameters.set<Real>       ("bead radius")  = Rb;
+  equation_systems.parameters.set<Real>              ("drag")  = drag_c;
+  equation_systems.parameters.set<Real>                ("tc")  = tc;
+  equation_systems.parameters.set<Real>               ("Nks")  = Nks;
+  equation_systems.parameters.set<Real>               ("Ss2")  = Ss2;
+  equation_systems.parameters.set<string> ("particle_type")  = particle_type;
+  equation_systems.parameters.set<string> ("point_particle_model") = point_particle_model;
+  // Attach force fields
+  equation_systems.parameters.set<std::vector<string>> ("pp_force_types") = pp_force_type;
+  for (int i=0; i<num_pp_force; i++) equation_systems.parameters.set<std::vector<Real>> (pp_force[i].first) = pp_force[i].second;
+  equation_systems.parameters.set<std::vector<string>> ("pw_force_types") = pw_force_type;
+  for (int i=0; i<num_pw_force; i++) equation_systems.parameters.set<std::vector<Real>> (pw_force[i].first) = pw_force[i].second;
+  equation_systems.parameters.set<string> ("test_name") = test_name;
+  equation_systems.parameters.set<string> ("wall_type") = wall_type;
+  equation_systems.parameters.set<std::vector<Real>> (wall_type) = wall_params;
+}
+
+void CopssPointParticleSystem::update_object(std::string stage)
+{
+  if(point_particle_model == "polymer_chain")
+  {
+    chain_broken = polymer_chain->check_chain(max_spring_len);
+    if(chain_broken) {
+      output_msg = "   ********** warning: Polymer chain is broken " + stage +"\n"+
+                   "   ********** warning: bead position is corrected by scaling the chain length and moving the particle according to periodicity";
+      PMToolBox::output_message(output_msg, comm_in);
+    }
+  }  
+}
+
+
+void CopssPointParticleSystem::run(EquationSystems& equation_systems){
+  output_msg = "------> Start moving particle\n";
+  PMToolBox::output_message(output_msg,comm_in);
+  // get stokes system from equation systems
+  PMLinearImplicitSystem& system = equation_systems.get_system<PMLinearImplicitSystem> ("Stokes");
+   
+   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   Parameters for dynamic process
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+  NP     = point_mesh->num_particles();
+  n_vec  = dim*NP;
+
+
+  // Get a better conformation of polymer chains before simulation.
+  this -> update_object("in initial data input");
+
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  Compute undisturbed velocity field without particles.
+  NOTE: We MUST re-init particle-mesh before solving Stokes
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+  PMToolBox::output_message("(1/3) Compute the undisturbed velocity field", comm_in);
+  this -> solve_undisturbed_system(equation_systems); 
+  
+  /* output particle data at the 0-th step in the VTK format */
+  if(restart==false)
+  {
+    if(comm_in.rank()==0){
+	     if(point_particle_model == "polymer_chain") polymer_chain->write_polymer_chain("output_polymer_0.vtk");
+	     else polymer_chain->write_bead("output_bead_0.csv");
+    }
+  }
+
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   Create vectors and Shell Mat for use:
+   U0:          particle velocity vector;
+   R0/R_mid:    particle position vector;
+   dw/dw_mid:   random vector;
+   RIN/ROUT:    the initial and intermediate particle postion vector for msd output
+   RIN will not change, and ROUT excludes pbc
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+  PMToolBox::output_message("(2/3) Prepare RIN & ROUT in binary format &  Create Brownain system at step 0", comm_in);
+  this -> create_brownian_system(equation_systems);
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   Advancing in time. Fixman Mid-Point algorithm
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+  PMToolBox::output_message("(3/3) Start calculating dynamics and advancing time steps", comm_in);
+  
+  const unsigned int istart = restart_step;
+  const unsigned int iend   = restart_step + nstep;
+  o_step = restart_step;  // output step
+  vel0.resize(n_vec);
+  vel1.resize(n_vec);
+  // Initialize compute_eigen to true
+  compute_eigen = true;
+  real_time = restart_time;
+  //start integration
+  for(unsigned int i=istart; i<iend; ++i)
+  {
+    PMToolBox::output_message("Starting Fixman Mid-Point algorithm at step "+std::to_string(i+1)+" ...", comm_in);
+    // integrate particle movement using fixman's mid point scheme
+    this -> fixman_integrate(equation_systems, i);  
+    // Update the time
+    if(i%write_interval==0){
+      o_step++; 
+      if(comm_in.rank()==0){
+
+        /*---------------------------------------------------------------------------------------
+         * output polymer chain / bead data in the VTK format at step i
+        -----------------------------------------------------------------------------------------*/
+        if(point_particle_model == "polymer_chain"){
+                 oss << "output_polymer_" << o_step << ".vtk";
+           polymer_chain->write_polymer_chain( oss.str() );
+        }
+        else{
+           oss << "output_bead_" << o_step <<".csv";
+           polymer_chain->write_bead(oss.str());
+        } // end else
+        /*----------------------------------------------------------------------------------------------------
+         * Output mean square displacement, radius of gyration, chain stretch, and center of mass at step i
+         --------------------------------------------------------------------------------------------------- */
+      } // end if comm_in.rank() == 0
+      brownian_sys->output_statistics_stepi(out_msd_flag, out_stretch_flag, out_gyration_flag, out_com_flag,
+                                             i, real_time, center0, ROUT);
+      oss.str(""); oss.clear();
+      /*----------------------------------------------------------------------------------------------------
+       * Write out ROUT for restart mode at step i
+      ----------------------------------------------------------------------------------------------------*/
+      PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vector_ROUT.dat",FILE_MODE_WRITE,&viewer);
+      VecView(ROUT,viewer);
+    }
+
+  }
+
+
+
+
+
+
+
+
+
+}
 
 } // end of namespace

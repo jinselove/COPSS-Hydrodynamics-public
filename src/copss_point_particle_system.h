@@ -34,6 +34,9 @@ public:
 
 	~CopssPointParticleSystem();
 
+	// integrator
+	void run(EquationSystems& equation_systems) override;
+
 protected:
 	std::string point_particle_model;
 	// ===========for beads and polymer chains
@@ -49,6 +52,10 @@ protected:
 	Real chain_length; // contour length of the spring (um)
 	Real Dc; // Diffusivity of the chain (um^2/s)
 
+	// extra parameters for dynamic process
+	Real max_spring_len;
+	bool chain_broken;
+
 	//void read_data(std::string control_file){};
 	// override read_particle_parameters() function in Copss class
 	void read_particle_info () override;
@@ -59,11 +66,23 @@ protected:
 	// create object mesh
 	void create_object_mesh() override;
 
+	// attach object mesh to system
+	void attach_object_mesh(PMLinearImplicitSystem& system) override;
+
+	// set parameters for equations systems
+	void set_parameters(EquationSystems& equation_systems) override;
+
+	// update object due to PBC after check_wall()
+	void update_object(std::string stage) override;
+
+
+
 private:
 
 	PolymerChain* polymer_chain;
-	PointMesh<3>* point_mesh;
+	//std::unique_ptr<PolymerChain> polymer_chain;
 
+	//std::unique_ptr<PointMesh<3> > point_mesh; 
 
 
 

@@ -180,7 +180,8 @@ public:
   std::size_t chain_id() const {  return _chain_id; }
  
 
-  std::size_t n_chains() const { return (_beads.size() - _n_bonds); } 
+  std::size_t n_chains() const { 
+    return (_beads.size() - _n_bonds); } 
   
   /*
    * Return the total number of beads

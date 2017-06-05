@@ -4,18 +4,26 @@
 int main (int argc, char **argv){
 
   CopssInit init(argc, argv);
-
-
   CopssPointParticleSystem system(init);
-
-  
+ // CopssRigidParticleSystem system(init);
+// 
   // Print out the current date and time 
   time_t rawtime;
   struct tm * timeinfo;
   time ( &rawtime );
   timeinfo = localtime ( &rawtime );
-//	system.start_time(timeinfo);
+  system.start_time(timeinfo);
 
-  system.init_system("polymer_control.in");
+  EquationSystems equation_systems = system.init_system("polymer_control.in");
+  system.run(equation_systems);
+
+
+  system.destroy();
+ 
+
+
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+  system.end_time(timeinfo);
   return 0;
 }

@@ -79,7 +79,7 @@ n_mesh = '8 8 8'
 #############################################
 #	 Force info (particle-particle force)         			
 #############################################
-particle_particle_force_types
+particle_particle_force_types = 'pp_wormLike_spring'
 
 #############################################
 #	 Force info (particle-wall force)
@@ -153,7 +153,7 @@ tol_eigen = 0.01
 #############################################
 #			   Run info
 #############################################
-with_brownian  = true
+with_brownian  = false
 adaptive_dt	   = true
 max_dr_coeff = 0.1
 write_interval = 2

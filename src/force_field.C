@@ -153,8 +153,7 @@ ForceField::ForceField(PMLinearImplicitSystem& pm_sys)
   _periodic = _point_mesh->pm_periodic_boundary()->periodic_direction();
   
   _inlet = _point_mesh->pm_periodic_boundary()->inlet_direction();
- 
-}
+ }
 
 
 
@@ -170,7 +169,6 @@ void ForceField::reinit_force_field()
 {
   START_LOG ("reinit_force_field()", "ForceField");
   std::size_t  point_start_id     = 0;
- 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    0. zero the force vectors on all the points.
    This has been done in point_mesh->reinit()
