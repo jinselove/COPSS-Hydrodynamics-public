@@ -113,6 +113,7 @@ If you meet any trouble, please refer to [SLEPC installation](http://slepc.upv.e
 	 `make`
 
  - Run the system
+
 	 `cd /path/to/copss/examples/general_point_particle/`
 
 	`cp /path/to/copss/src/example-opt $PWD`	 
