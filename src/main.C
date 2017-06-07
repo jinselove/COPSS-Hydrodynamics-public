@@ -14,7 +14,7 @@ int main (int argc, char **argv){
   timeinfo = localtime ( &rawtime );
   system.start_time(timeinfo);
 
-  EquationSystems equation_systems = system.init_system("polymer_control.in");
+  EquationSystems equation_systems = system.init_system("point_particle_control.in");
   system.run(equation_systems);
 
 

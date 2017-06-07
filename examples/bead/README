@@ -1,0 +1,25 @@
+This folder contains examples for a CopssPointParticle system, the point particle model is individual beads.
+In this simple example, two beads are places in a confined box and driven by constant forces.
+You can also turn on "Brownian" "in point_particle_control.in" to observe Brownian motions of the beads
+
+
+1) "point_particle_control.in": defined simulation parameter that COPSS needs, including physical parameters, domain mesh info, force field, run info, etc. 
+2) "point_particle_data.in": defined molecule configurations (in lammps data file format)
+
+How to run this example:
+
+1) Follow instructions to Compile PETSC, SLEPC, LIBMESH and then compile COPSS in /src.
+2) Copy the executable "example-opt" into this folder
+3) Copy "run.sh" from /tools into this folder
+4) run "bash run.sh"
+
+What you get:
+
+1) A ".e" file which contains solutions, i.e., velocity, pressure, to the flow field at all time steps. 
+2) ".csv" files which contains configurations of all beads at different time step. 
+3) "output_statistics.dat" which contains the statistics of your molecules, e.g., MSD, center of mass,etc. 
+
+
+How to visualize the output:
+
+1) You can load the ".e" and ".csv" files into "Paraview" to visualize the motions of point particles within flow field. (I prepared a sample video of the paraview output)
