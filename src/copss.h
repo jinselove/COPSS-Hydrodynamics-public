@@ -89,6 +89,7 @@ public:
   std::string control_fileName;
   // test name
   std::string test_name;
+  bool print_info;
   // physical parameters
   const Real kB = 1.380662E-17;//1.380662E-23(J/K) = 1.3806623E-23(N*m/K) = 1.380662E-17(N*um/K)
   const Real PI = libMesh::pi;
@@ -154,7 +155,7 @@ public:
   std::size_t random_seed;
   bool adaptive_dt; // if use adaptive time step (essential for brownian systems)
   Real dt0; // timestep when brownian system starts (step1)
-  Real max_dr_coeff; // max displacement per step
+  Real max_dr_coeff = 0.1; // max displacement per step
   bool restart; // if restart
   std::size_t restart_step; // restart step
   Real restart_time; // real time at restart step

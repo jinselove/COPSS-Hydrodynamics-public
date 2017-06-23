@@ -1,4 +1,4 @@
-#include "copss_point_particle_system.h"
+#include "../../src/copss_point_particle_system.h"
 
 // this is just for test
 int main (int argc, char **argv){
@@ -13,7 +13,6 @@ int main (int argc, char **argv){
   time ( &rawtime );
   timeinfo = localtime ( &rawtime );
   system.start_time(timeinfo);
-
   EquationSystems equation_systems = system.init_system("point_particle_control.in");
   system.run(equation_systems);
 

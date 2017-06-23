@@ -4,10 +4,8 @@ using std::cout;
 using std::endl;
 using std::string;
 
+
 namespace libMesh{
-
-
-
 //==========================================================================
 CopssPointParticleSystem::CopssPointParticleSystem(CopssInit& init)
 :Copss(init)
@@ -61,43 +59,36 @@ void CopssPointParticleSystem::read_particle_info(){
 		libmesh_error();     
 	}
 
-	if(comm_in.rank() == 0){
-		printf("##########################################################\n"
-		       "#                  Particle Parameters                    \n"
-		       "##########################################################\n\n"
-		       "   Particle type             : %s\n"
-		  	   "   Point Particle model      : %s\n"
-		 	   "   number of beads       Nb  = %d\n",
-		 	   particle_type.c_str(), point_particle_model.c_str(), Nb);
+	cout<<"##########################################################\n"
+	         <<"#                  Particle Parameters                    \n"
+	         <<"##########################################################\n\n"
+	         <<"   Particle type             : " << particle_type.c_str() << endl
+	  	     <<"   Point Particle model      : " << point_particle_model.c_str() << endl
+	 	       <<"   number of beads       Nb  = " << Nb << endl;
+	  // for particular models
+	if(point_particle_model == "polymer_chain"){
+	cout<<"   number of springs per Chain       Ns  = " << Ns << endl
+				   <<"   number of Chains              nChains = " << nChains << endl
+				   <<"   Kuhn length                      bk  = " <<bk <<" (um)\n"
+				   <<"   # of Kuhn segment per spring      Nks = " << Nks << "\n"
+				   <<"   second moment of polymer chain    Ss2 = " << Ss2 << " (um^2)\n"
+				   <<"   maximum spring length             q0  = " << q0  << " (um)\n"
+				   <<"   chain length of polymer           Lc  = " << chain_length <<" (um)\n"
+				   <<"   chain diffusivity                 Dc  = " << Dc <<" (um^2/s)\n";
+	}
 
-		  // for particular models
-		if(point_particle_model == "polymer_chain"){
-			printf( "   number of springs per Chain       Ns  = %d\n"
-					"   number of Chains              nChains = %d\n"
-					"   Kuhn length                       bk  = %.6e (um)\n"
-					"   # of Kuhn segment per spring      Nks = %.6e\n"
-					"   second moment of polymer chain    Ss2 = %.6e (um^2)\n"
-					"   maximum spring length             q0  = %.6e (um)\n"
-					"   chain length of polymer           Lc  = %.6e (um)\n"
-					"   chain diffusivity                 Dc  = %.6e (um^2/s)\n",
-		  			Ns, nChains, bk, Nks, Ss2, q0, chain_length, Dc);
-		}
-
-		printf("------------> The non-dimensional variables:\n");
+	cout << "------------> The non-dimensional variables:\n";
 
 
-		printf( "   non-dimensional bead radius      a0     = %.1e\n"
-			  	"   non-dimensional ksi = sqrt(PI)/(3a0)    = %.6e\n",
-			  	1.0, std::sqrt(PI)/(3.) );
-		if(point_particle_model == "polymer_chain"){
-			printf( "   non-dimensional Kuhn length    bk/a     = %.6e\n"
-			  		"   non-dimensional spring length  q0/a     = %.6e\n"
-			  		"   non-dimensional contour length Lc/a     = %.6e\n"
-			  		"   non-dimensional Ss/a = sqrt(Ss2/a^2)    = %.6e\n"
-			  		"   non-dimensional ksi = sqrt(PI)/(3a0)    = %.6e\n",
-			  		bk/Rb, q0/Rb, chain_length/Rb, std::sqrt(Ss2/Rb/Rb), std::sqrt(PI)/(3.) );
-		}
-	} // end if (comm_in.rank() == 0)
+	cout<<"   non-dimensional bead radius      a0     = " << 1.0 << "\n"
+		  	   <<"   non-dimensional ksi = sqrt(PI)/(3a0)    = " << std::sqrt(PI) / 3. <<"\n";
+	if(point_particle_model == "polymer_chain"){
+		cout <<"   non-dimensional Kuhn length    bk/a     = " <<bk/Rb <<"\n"
+		  		    <<"   non-dimensional spring length  q0/a     = " <<q0/Rb <<"\n"
+		  		    <<"   non-dimensional contour length Lc/a     = " <<chain_length/Rb <<"\n"
+		  		    <<"   non-dimensional Ss/a = sqrt(Ss2/a^2)    = " <<std::sqrt(Ss2/Rb/Rb) <<"\n"
+		  		    <<"   non-dimensional ksi = sqrt(PI)/(3a0)    = " <<std::sqrt(PI)/(3.) <<"\n";
+	}
 }// end read_particle_parameter()
 
 
@@ -109,29 +100,33 @@ void CopssPointParticleSystem::create_object(){
   std::ostringstream pfilename;
   if(restart)
   {
-	pfilename << point_particle_model<<"_data_restart_"<< restart_step << ".vtk";
-	output_msg = "-------------> read "+point_particle_model+" data from "+pfilename.str()+ " in restart mode\n";
-	PMToolBox::output_message(output_msg, comm_in);	
+  	pfilename << point_particle_model<<"_data_restart_"<< restart_step << ".vtk";
+    cout <<"-------------> read "<<point_particle_model<<" data from "<<pfilename.str()<< "in restart mode"<<endl;
     polymer_chain->read_data_vtk(pfilename.str());
   } 
   else
   {
-	pfilename << "point_particle_data.in";
-	polymer_chain->read_data_pizza(pfilename.str(), Nb, nBonds, comm_in.rank());
-	output_msg = "--------------> polymer_chain object is built for copss_point_particle_system using data from "+pfilename.str();
-	PMToolBox::output_message(output_msg, comm_in);
-	//comm_in.barrier();
+  	pfilename << "point_particle_data.in";
+    cout<<"--------------> skip generating datafile, will read in existed pizza file: "<<pfilename.str()<<endl;
+  	polymer_chain->read_data_pizza(pfilename.str(), Nb, nBonds, comm_in.rank());
+    cout<<"--------------> Polymer_chain class is built!\n";
+  	comm_in.barrier();
   }
   pfilename.str(""); pfilename.clear();
+  comm_in.barrier();
 }//end function
 
 //=====================================================================
 void CopssPointParticleSystem::create_object_mesh(){
   // prepare domain and objects
+  cout << "\n==>(1/4) Generate/Create domain Mesh\n";
   this -> create_domain_mesh();
+  cout << "\n==>(2/4) Create periodic box \n ";
   this -> create_periodic_boundary();
+  cout << "\n==>(3/4) Create polymer chain object (for beads or polymer_chain) \n";
   this -> create_object();
 
+  cout << "\n==>(4/4) Create point_mesh object \n";
   // create object mesh
   search_radius_p = 4.0/alpha;
   search_radius_e = 0.5*max_mesh_size + search_radius_p;
@@ -142,17 +137,16 @@ void CopssPointParticleSystem::create_object_mesh(){
   point_mesh->add_periodic_boundary(*pm_periodic_boundary);
 
   point_mesh->reinit();
-
-  if(comm_in.rank() == 0){
-  	printf("-------------> Reinit point mesh object, finished! \n"
-  		   "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
-		   "### The point-mesh info:\n"
-		   "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
-		   "Total number of point particles: %d\n "
-		   "search_radius_p = %.4e, , search_radius_e = %.4e\n\n",
-		   point_mesh->num_particles(), search_radius_p, search_radius_e);
-	  point_mesh->print_point_info();
-  }
+  cout <<"-------------> Reinit point mesh object, finished! \n"
+            <<"- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+		        <<"### The point-mesh info:\n"
+		        <<"- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+		        <<"Total number of point particles:"<<point_mesh->num_particles() << endl
+		        <<"search_radius_p = "<< search_radius_p << endl
+            <<"search_radius_e = "<< search_radius_e << endl;
+  if(print_info == true){
+    if (comm_in.rank() == 0) point_mesh->print_point_info();
+  } 
 } // end function
 
 
@@ -212,8 +206,7 @@ void CopssPointParticleSystem::update_object(std::string stage)
 
 
 void CopssPointParticleSystem::run(EquationSystems& equation_systems){
-  output_msg = "------> Start moving particle\n";
-  PMToolBox::output_message(output_msg,comm_in);
+  cout<<endl<<"============================4. Start moving particles ============================"<<endl<<endl;
   // get stokes system from equation systems
   PMLinearImplicitSystem& system = equation_systems.get_system<PMLinearImplicitSystem> ("Stokes");
    
@@ -231,7 +224,7 @@ void CopssPointParticleSystem::run(EquationSystems& equation_systems){
   Compute undisturbed velocity field without particles.
   NOTE: We MUST re-init particle-mesh before solving Stokes
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  PMToolBox::output_message("(1/3) Compute the undisturbed velocity field", comm_in);
+  cout<<"==>(1/3) Compute the undisturbed velocity field"<<endl;
   this -> solve_undisturbed_system(equation_systems); 
   
   /* output particle data at the 0-th step in the VTK format */
@@ -251,14 +244,13 @@ void CopssPointParticleSystem::run(EquationSystems& equation_systems){
    RIN/ROUT:    the initial and intermediate particle postion vector for msd output
    RIN will not change, and ROUT excludes pbc
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  PMToolBox::output_message("(2/3) Prepare RIN & ROUT in binary format &  Create Brownain system at step 0", comm_in);
+  cout<<"==>(2/3) Prepare RIN & ROUT and Brownian_system in binary format at step 0"<<endl;
   this -> create_brownian_system(equation_systems);
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Advancing in time. Fixman Mid-Point algorithm
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  PMToolBox::output_message("(3/3) Start calculating dynamics and advancing time steps", comm_in);
-  
-  const unsigned int istart = restart_step;
+  cout<<"==>(3/3) Start calculating dynamics and advancing time steps"<<endl;
+  const unsigned int istart = restart_step + 1;
   const unsigned int iend   = restart_step + nstep;
   o_step = restart_step;  // output step
   vel0.resize(n_vec);
@@ -266,15 +258,17 @@ void CopssPointParticleSystem::run(EquationSystems& equation_systems){
   // Initialize compute_eigen to true
   compute_eigen = true;
   real_time = restart_time;
+  if (adaptive_dt == true and point_particle_model == "polymer_chain") max_dr_coeff = 0.1 * Ss2 / Rb / Rb;
+
+
   //start integration
-  for(unsigned int i=istart; i<iend; ++i)
+  for(unsigned int i=istart; i<=iend; ++i)
   {
-    PMToolBox::output_message("Starting Fixman Mid-Point algorithm at step "+std::to_string(i+1)+" ...", comm_in);
+    cout << "\nStarting Fixman Mid-Point algorithm at step "<< i << endl;
     // integrate particle movement using fixman's mid point scheme
     this -> fixman_integrate(equation_systems, i);  
     // Update the time
     if(i%write_interval==0){
-      o_step++; 
       if(comm_in.rank()==0){
 
         /*---------------------------------------------------------------------------------------
