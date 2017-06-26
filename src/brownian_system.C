@@ -1082,25 +1082,22 @@ Real BrownianSystem::mean_square_end_to_end_distance(Vec R0) const
 // ======================================================================================
 std::vector<Point> BrownianSystem::center_of_mass(Vec R0) const
 {
+  START_LOG ("center_of_mass()", "BrownianSystem");
   std::vector<Point> center(this->num_chains());
-//  std::cout <<"\n------------------------------\n test_brownian_system: number of chains = "<<this->num_chains()<<"\n----------------------------------\n";
   PetscInt          size;
   PetscErrorCode    ierr;
   std::vector<Real> lvec;
-  PetscFunctionBeginUser;
-  START_LOG ("center_of_mass()", "BrownianSystem");
-  
+  PetscFunctionBeginUser;  
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Check the size of Vec
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   ierr = VecGetSize(R0,&size);
   libmesh_assert_equal_to(size, _dim*_n_points);
-  
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Allgather the distributed vector R0 to local vector lvec on all processors
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   this->vector_transform(lvec,&R0,"backward"); // R0->lvec
-  
+
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    loop over each particle
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -1114,6 +1111,7 @@ std::vector<Point> BrownianSystem::center_of_mass(Vec R0) const
           }// end j loop over each beads of a chain
      center[i] /= Real(_n_points/_n_chains);
   }//end i loop over each chain
+
   // return
   STOP_LOG ("center_of_mass()", "BrownianSystem");
   PetscFunctionReturn(center);
@@ -1361,6 +1359,7 @@ void BrownianSystem::output_statistics_stepi(bool out_msd_flag, bool out_stretch
   const std::vector<Point> center1 = this->center_of_mass(ROUT);
   // mean square displacement
   Point msd(0.,0.,0.);
+
   for (std::size_t j = 0; j < _n_chains; j++)
   {
     Point msd_j = this->mean_square_displacement(center0[j], center1[j]);
@@ -1373,8 +1372,7 @@ void BrownianSystem::output_statistics_stepi(bool out_msd_flag, bool out_stretch
   std::vector<Real> Rg1 = this->radius_of_gyration(ROUT, center1);
   std::ofstream out_file;
   int o_width = 10, o_precision = 9; 
-
-  if(this->comm().rank()==0){
+ // if(this->comm().rank()==0){
     // output mean square displacement
     out_file.open("output_statistics.dat", std::ios_base::app);
     out_file.setf(std::ios::right); out_file.setf(std::ios::fixed);
@@ -1413,7 +1411,7 @@ void BrownianSystem::output_statistics_stepi(bool out_msd_flag, bool out_stretch
     }
     out_file <<"\n";
     out_file.close();
-  }// end this->comm().rank() == 0
+ // }// end this->comm().rank() == 0
 }
 
 

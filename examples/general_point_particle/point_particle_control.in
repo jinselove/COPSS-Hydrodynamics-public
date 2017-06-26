@@ -7,7 +7,7 @@
 #############################################
 
 test_name = general
-print_info = true
+print_info = false
 
 #############################################
 #			   Physical parameters         			
@@ -29,13 +29,10 @@ temperature = 297
 
 
 # Number of beads 
-Nb = 2
+Nb = 11
 
 # Number of springs per chain => Number of beads then is Nb = Ns+1
-Ns = 1
-
-# maximum bond length used to generate data file; this number may be smaller than maximum bond length
-#init_bondLength = 10
+Ns = 10
 
 # Kuhn length (um)
 bk  = 0.106
@@ -60,10 +57,10 @@ dimension = 3
 wall_type = slit
 
 # domain size #
-slit = '-50. 50. -50. 50. -5. 5.'
+slit = '-130. 130. -130. 130. -13. 13.'
 
 # periodicity #
-periodicity = 'false false false'
+periodicity = 'true false false'
 
 # inlet info #
 inlet = 'false false false'
@@ -74,24 +71,23 @@ inlet_pressure = '0 0 0'
 #			   Mesh info         			
 #############################################
 generate_mesh = true
-n_mesh = '8 8 8'
+n_mesh = '37 37 4'
 
 #############################################
 #	 Force info (particle-particle force)         			
 #############################################
-particle_particle_force_types
-
+particle_particle_force_types = 'pp_wormLike_spring pp_ev_gaussian_polymerChain'
+pp_ev_gaussian_polymerChain = '2.628506592'
 #############################################
 #	 Force info (particle-wall force)
 #############################################
-particle_wall_force_types = 'pw_ev_harmonic_repulsive'
-pw_ev_harmonic_repulsive = '1. 3.0'
+particle_wall_force_types = 'pw_ev_empirical_polymerChain'
 
 #############################################
 #			   GGEM info
 #############################################
 # smoothing parameter in GGEM (non-unit) #
-alpha = 0.1
+alpha = 0.3
 
 
 #############################################
@@ -154,12 +150,11 @@ tol_eigen = 0.01
 #			   Run info
 #############################################
 with_brownian  = true
-adaptive_dt	   = true
-max_dr_coeff = 0.1
-write_interval = 2
+adaptive_dt    = true
+write_interval = 1
 restart        = false
 restart_step   = 10
 restart_time   = 1.438907510
 random_seed    = 123456789
-nstep          = 4
+nstep          = 5
 

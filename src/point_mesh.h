@@ -438,7 +438,6 @@ public:
   };
   
   
-  
   /**
    * Return the search radius
    */

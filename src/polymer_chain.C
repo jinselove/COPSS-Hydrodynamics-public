@@ -122,7 +122,10 @@ void PolymerChain::read_data(const std::string& filename)
 
   
 // ======================================================================
-void PolymerChain::read_data_pizza(const std::string& filename)
+void PolymerChain::read_data_pizza(const std::string& filename,
+                                   const unsigned int& num_beads,
+                                   const unsigned int& num_bonds,
+                                   unsigned int comm_in_rank)
 {
   START_LOG ("read_data_pizza()", "PolymerChain");
   
@@ -132,7 +135,7 @@ void PolymerChain::read_data_pizza(const std::string& filename)
   infile.open (filename, std::ios_base::in);
   if( !infile.good() )
   {
-    printf("***warning: read_data_pizza() can NOT read the polymer chain data!");
+    printf("***warning: read_data_pizza() can NOT read the polymer chain data!\n");
     libmesh_error();
   }
   
@@ -152,7 +155,13 @@ void PolymerChain::read_data_pizza(const std::string& filename)
   infile >> _n_bonds >> line_str; // 2. # of bonds
   infile >> _n_bead_types >> line_str >> str_tmpt; // 3. # of bead types
   infile >> _n_bond_types >> line_str >> str_tmpt; // 4. # of bond types
-  
+  if(_n_beads != num_beads or _n_bonds != num_bonds){
+    if (comm_in_rank == 0){
+      printf("Warning: number of beads/bonds in current data file and control file does not match\n");
+    }
+    libmesh_error();
+  }
+
   // An alternative way to read line info
 //  std::getline(infile, line_str); // 1. # of beads
 //  std::istringstream iss1(line_str);

@@ -1,8 +1,5 @@
 ######################################################################
 #
-# Template libMesh application Makefile
-LIBMESH_DIR ?= /Users/xzhao/software/libmesh/libmesh-opt
-
 # include the library options determined by configure
 include $(LIBMESH_DIR)/Make.common
 

@@ -266,7 +266,7 @@ void PMToolBox::coordinate_rotation(Point& pt,
 void PMToolBox::output_message(const std::string& msg,
                                const Parallel::Communicator & comm_in)
 {
-  comm_in.barrier();
+  //comm_in.barrier();
   if( comm_in.rank()==0 )
   {
     printf("\n");
