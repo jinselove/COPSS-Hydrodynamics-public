@@ -27,10 +27,6 @@ viscosity = 1.018E-15
 # temperature # (K)
 temperature = 297
 
-
-# Number of beads 
-Nb = 11
-
 # radius of the bead (um)
 radius = 0.077
 

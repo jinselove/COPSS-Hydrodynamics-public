@@ -428,7 +428,8 @@ void Copss::create_domain_mesh()
   }
   mesh = new SerialMesh(comm_in);
   //mesh = std::unique_ptr<SerialMesh> (new SerialMesh (comm_in));
-  if(generate_mesh and wall_type == "slit"){      
+  if(generate_mesh){
+    if (wall_type == "slit"){      
         const Real meshsize_x   = (wall_params[1] - wall_params[0])/Real( n_mesh[0] );
         const Real meshsize_y   = (wall_params[3] - wall_params[2])/Real( n_mesh[1] );
         const Real meshsize_z   = (wall_params[5] - wall_params[4])/Real( n_mesh[2] );
@@ -457,7 +458,11 @@ void Copss::create_domain_mesh()
           MeshTools::Generation::build_cube (*mesh, n_mesh[0], n_mesh[1], n_mesh[2],
                                             wall_params[0], wall_params[1], wall_params[2], wall_params[3], wall_params[4], wall_params[5], HEX20);  // HEX20/27
         }
-    }// end if (generate_mesh)
+    }
+    else if (wall_type == "sphere"){
+      
+    }
+  }// end if (generate_mesh)
     else if(domain_mesh_file != "nothing"){
           mesh->read(domain_mesh_file);    
           mesh->all_second_order();

@@ -29,10 +29,10 @@ temperature = 297
 
 
 # Number of beads 
-Nb = 11
+#Nb = 11
 
 # Number of springs per chain => Number of beads then is Nb = Ns+1
-Ns = 10
+#Ns = 10
 
 # Kuhn length (um)
 bk  = 0.106
