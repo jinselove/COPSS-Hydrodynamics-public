@@ -90,7 +90,13 @@ public:
    */
   void read_data_vtk(const std::string& filename);
   
- 
+  /*
+   * Read the data of chain from local file with csv format.
+   * This will be useful to restart the simulation
+   */
+  void read_data_csv(const std::string& filename); 
+
+
    /*
    * Read the data of PBC counter from local file.
    * This is useful to restart the simulation
@@ -180,8 +186,7 @@ public:
   std::size_t chain_id() const {  return _chain_id; }
  
 
-  std::size_t n_chains() const { 
-    return (_beads.size() - _n_bonds); } 
+  std::size_t n_chains() const { return _n_chains;} 
   
   /*
    * Return the total number of beads

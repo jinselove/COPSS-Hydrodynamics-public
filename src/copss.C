@@ -675,6 +675,9 @@ void Copss::solve_undisturbed_system(EquationSystems& equation_systems)
   reinit_stokes = true;
   system.solve_stokes("undisturbed",reinit_stokes);
   v0_ptr = system.solution->clone(); // backup v0
+  if (print_info) {
+    if (comm_in.rank() == 0) point_mesh -> print_point_info();
+  }
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    write out the equation systems if write_es = true at Step 0 (undisturbed field)
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */

@@ -100,9 +100,16 @@ void CopssPointParticleSystem::create_object(){
   std::ostringstream pfilename;
   if(restart)
   {
-  	pfilename << point_particle_model<<"_data_restart_"<< restart_step << ".vtk";
-    cout <<"-------------> read "<<point_particle_model<<" data from "<<pfilename.str()<< "in restart mode"<<endl;
-    polymer_chain->read_data_vtk(pfilename.str());
+    if(point_particle_model == "polymer_chain"){
+    	pfilename << "output_polymer_"<< restart_step << ".vtk";
+      polymer_chain->read_data_vtk(pfilename.str());
+    }
+    else if (point_particle_model == "bead"){
+      pfilename << "output_bead_" << restart_step << ".csv";
+      polymer_chain->read_data_csv(pfilename.str());
+    }
+    cout <<"-------------> read "<< point_particle_model << "data from " << pfilename.str() << " in restart mode" << endl;
+
   } 
   else
   {
@@ -110,7 +117,6 @@ void CopssPointParticleSystem::create_object(){
     cout<<"--------------> skip generating datafile, will read in existed pizza file: "<<pfilename.str()<<endl;
   	polymer_chain->read_data_pizza(pfilename.str(), Nb, nBonds, comm_in.rank());
     cout<<"--------------> Polymer_chain class is built!\n";
-  	comm_in.barrier();
   }
   pfilename.str(""); pfilename.clear();
   comm_in.barrier();
@@ -270,7 +276,6 @@ void CopssPointParticleSystem::run(EquationSystems& equation_systems){
     // Update the time
     if(i%write_interval==0){
       if(comm_in.rank()==0){
-
         /*---------------------------------------------------------------------------------------
          * output polymer chain / bead data in the VTK format at step i
         -----------------------------------------------------------------------------------------*/
@@ -296,16 +301,7 @@ void CopssPointParticleSystem::run(EquationSystems& equation_systems){
       VecView(ROUT,viewer);
     }
 
-  }
-
-
-
-
-
-
-
-
-
+  } // end step integration
 }
 
 } // end of namespace
