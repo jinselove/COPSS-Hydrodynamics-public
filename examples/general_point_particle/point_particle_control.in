@@ -156,5 +156,5 @@ restart        = false
 restart_step   = 10
 restart_time   = 1.438907510
 random_seed    = 123456789
-nstep          = 5
+nstep          = 20
 
