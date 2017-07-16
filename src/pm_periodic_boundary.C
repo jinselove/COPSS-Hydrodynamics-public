@@ -339,14 +339,14 @@ Real PMPeriodicBoundary::point_distance(const Point& pt0,
   // the distance vector
   const Point x = this->point_vector(pt0,pt1);
   
-  Real dist = 0.0;
-  for(std::size_t i=0; i<3; ++i) {
-    dist += x(i)*x(i);
-  }
+//  Real dist = 0.0;
+//  for(std::size_t i=0; i<3; ++i) {
+//    dist += x(i)*x(i);
+//  }
   
   STOP_LOG ("point_distance()", "PMPeriodicBoundary");
   
-  return std::sqrt(dist);
+  return x.norm();
 }
 
 
