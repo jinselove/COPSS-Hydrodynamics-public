@@ -1,4 +1,4 @@
-#include "../../src/copss_point_particle_system.h"
+#include "copss_point_particle_system.h"
 
 int main (int argc, char **argv){
 

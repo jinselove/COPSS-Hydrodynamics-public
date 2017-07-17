@@ -208,6 +208,7 @@ void CopssPointParticleSystem::update_object(std::string stage)
 
 
 void CopssPointParticleSystem::run(EquationSystems& equation_systems){
+  PerfLog perf_log("Copss-Hydrodynamics-PointParticleSystem");
   cout<<endl<<"============================4. Start moving particles ============================"<<endl<<endl;
   // get stokes system from equation systems
   PMLinearImplicitSystem& system = equation_systems.get_system<PMLinearImplicitSystem> ("Stokes");
@@ -227,8 +228,9 @@ void CopssPointParticleSystem::run(EquationSystems& equation_systems){
   NOTE: We MUST re-init particle-mesh before solving Stokes
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   cout<<"==>(1/3) Compute the undisturbed velocity field"<<endl;
+  perf_log.push ("solve undisturbed_system");
   this -> solve_undisturbed_system(equation_systems); 
-  
+  perf_log.pop ("solve undisturbed_system");
   /* output particle data at the 0-th step in the VTK format */
   if(restart==false)
   {
@@ -264,6 +266,8 @@ void CopssPointParticleSystem::run(EquationSystems& equation_systems){
 
 
   //start integration
+
+  perf_log.push ("integration");
   for(unsigned int i=istart; i<=iend; ++i)
   {
     cout << "\nStarting Fixman Mid-Point algorithm at step "<< i << endl;
@@ -298,6 +302,8 @@ void CopssPointParticleSystem::run(EquationSystems& equation_systems){
     }
 
   } // end step integration
+  
+  perf_log.pop ("integration");
 }
 
 } // end of namespace
