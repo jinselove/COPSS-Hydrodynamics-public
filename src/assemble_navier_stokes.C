@@ -472,12 +472,6 @@ void AssembleNS::compute_element_rhs(const Elem*     elem,
     // get the location of points in the neighbor list
     GGEMSystem ggem_sys;
     const std::size_t n_pts = n_list.size();
-   // std::vector<Point> force_points(n_pts);
-   // for (std::size_t i=0; i<n_pts; ++i){
-   //   force_points[i] = point_mesh->particles()[n_list[i]]->point();
-   // }
-    
-    
     // Now we will build the element RHS using high order gauss quadrature.
     // first loop over all neighboring particles near this element
     Point np_pos(0.);
