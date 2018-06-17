@@ -1,13 +1,14 @@
-**COPSS**
+**COPSS 0.3.0**
 ====================
 
-**COPSS** (Continuum Particle Simulation Suite) is an open source,  [**LIBMESH**](http://libmesh.github.io/) based, software for continuum simulations. The package is designed to be easy to use, extendable and scalable. It currently includes two modules, [**COPSS-Hydrodynamics**](https://bitbucket.org/COPSS/copss-hydrodynamics-public.git) to solve hydrodynamic interactions in colloidal suspensions and [**COPSS-Polarization**](https://bitbucket.org/COPSS/copss-polarization-public) to solve electrostatic interactions between dielectric particles. The algorithms beneath **COPSS** have been published or under-review, but the code framework, user-interface, etc., are still rough. We are working on improving **COPSS** and appreciate your contributions.  
+**COPSS** (Continuum Particle Simulation Software) is an open source software for continuum-particle simulations. The package is designed to be easy to use, extensible, and scalable. It currently includes three modules, [**COPSS-Hydrodynamics**](https://bitbucket.org/COPSS/copss-hydrodynamics-public.git) to solve hydrodynamic interactions in colloidal suspensions, [**COPSS-Polarization**](https://bitbucket.org/COPSS/copss-polarization-public) to solve electrostatic interactions in heterogeneous dielectric media, and [**COPSS-CMA-ES**](https://bitbucket.org/COPSS/copss-cma-es) to inversely solve for charges on dielectric particles from particle trajectories.
+
 
 
 **COPSS-Hydrodynamics**
 ----------------------------
 
-**COPSS-Hydrodynamics** solves the hydrodynamic interactions in colloidal suspensions by directly solve the Stokes flow.  It is based on an efficient $O(N)$ computational approach to model the dynamics of hydrodyna- -mically interacting Brownian or micron-sized particles in arbitrary geometries. A parallel finite element Stokes' solver is the center of the algorithm. 
+**COPSS-Hydrodynamics** solves the hydrodynamic interactions in colloidal suspensions by directly solve the Stokes flow. It is based on an efficient $O(N)$ computational approach to model the dynamics of hydrodynamically interacting Brownian or non-Brownian particles in arbitrary geometries. A parallel finite element Stokes' solver is the center of the algorithm. 
 
 
 **Installation**
@@ -159,7 +160,7 @@ Hydrodynamic and electrostatic interactions are ubiquitous in nature and technol
 
 **Algorithm**
 -------------------------------------------
- Our method paper has details on the implementation and tests of this code:  **Parallel $O(N)$ Stokes' solver towards scalable Brownian dynamics  in general geometries, submitted, 2017**
+ Our method paper has details on the implementation and tests of this code: [Parallel $O(N)$ Stokes' solver towards scalable Brownian dynamics of hydrodynamically interacting objects in general geometries](https://aip.scitation.org/doi/10.1063/1.4989545)
 
 
 **Main contributors**
@@ -177,3 +178,15 @@ Hydrodynamic and electrostatic interactions are ubiquitous in nature and technol
 -------------------------------------------
  
 * The codes are open-source and distributed under the GNU GPL license, and may not be used for any commercial or for-profit purposes without our permission.
+
+
+
+**Release history of COPSS**
+-------------------------------------------
+ 
+ - 0.3.0 (Release COPSS-CMA-ES module)
+
+ - 0.2.0 (Release COPSS-Hydrodynamics module)
+
+ - 0.1.0 (Release COPSS-Polarization module)
+
